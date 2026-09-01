@@ -138,7 +138,12 @@
     max-width:520px;margin:0 auto;text-align:center;font-size:13.5px;color:var(--parchment-dim);
     border-left:2px solid var(--vermillion);padding-left:16px;text-align:left;
   }
-  .reunion-cta{display:block;text-align:center;margin-top:32px;}
+  .reunion-video{max-width:480px;margin:32px auto 0;}
+  .reunion-video video{
+    width:100%;display:block;background:#000;border-radius:18px;
+    border:1px solid rgba(183,64,47,0.4);
+    box-shadow:0 20px 50px -20px rgba(183,64,47,0.55);
+  }
 
   .reasons{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
   .reason-card{
@@ -177,11 +182,42 @@
   .field label{display:block;font-size:13px;color:var(--gold-soft);margin-bottom:8px;letter-spacing:.3px;}
   .field .hint{font-size:11.5px;color:var(--parchment-dim);margin-top:6px;}
   .row2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
-  input[type=text], input[type=tel], input[type=date], input[type=time], select{
+  input[type=text], input[type=tel], select{
     width:100%;padding:13px 14px;border-radius:10px;border:1px solid var(--line);
     background:var(--ink);color:var(--parchment);font-size:14.5px;font-family:inherit;
   }
   input::placeholder{color:#665f4d;}
+
+  /* ---------- date/time picker triggers ---------- */
+  .picker-trigger{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    padding:13px 14px;border-radius:10px;border:1px solid var(--line);
+    background:var(--ink);cursor:pointer;font-size:14.5px;color:var(--parchment);
+    user-select:none;
+  }
+  .picker-trigger:hover{border-color:var(--gold);}
+  .picker-trigger.disabled{opacity:.4;pointer-events:none;}
+  .picker-placeholder{color:#665f4d;}
+  .picker-icon{flex-shrink:0;opacity:.8;}
+
+  /* ---------- picker modals ---------- */
+  .picker-overlay{
+    position:fixed;inset:0;background:rgba(10,10,18,0.85);z-index:300;
+    display:none;align-items:center;justify-content:center;padding:20px;
+  }
+  .picker-box{background:var(--midnight);border:1px solid var(--line);border-radius:18px;padding:26px;max-width:320px;width:100%;}
+  .picker-title{font-family:'Gowun Batang',serif;color:var(--gold-soft);font-size:15px;margin:0 0 16px;text-align:center;}
+  .picker-head{display:flex;gap:10px;}
+  .picker-head select{flex:1;padding:10px;border-radius:8px;font-size:13.5px;}
+  .cal-weekdays{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:16px;font-size:11px;color:var(--parchment-dim);text-align:center;}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:8px;}
+  .cal-day{padding:9px 0;text-align:center;border-radius:8px;font-size:13px;color:var(--parchment);cursor:pointer;background:transparent;border:1px solid transparent;}
+  .cal-day:hover{border-color:var(--line);}
+  .cal-day.selected{background:var(--gold);color:#1a1408;font-weight:700;}
+  .cal-day.empty{visibility:hidden;cursor:default;}
+  .picker-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:20px;}
+  .picker-cancel{background:transparent;border:1px solid var(--line);color:var(--parchment-dim);padding:10px 18px;border-radius:10px;cursor:pointer;font-size:13px;font-family:inherit;}
+  .picker-confirm{width:auto;padding:10px 24px;}
   .radio-group{display:flex;gap:10px;}
   .radio-pill{flex:1;}
   .radio-pill input{display:none;}
@@ -302,8 +338,11 @@
         <div class="reunion-point"><div class="num">03</div><h3>다가가는 방법과 타이밍</h3><p>먼저 연락해도 좋을 때와 기다려야 할 때를 알려드립니다.</p></div>
       </div>
       <p class="reunion-note">신청서에 헤어진 상대방의 정보를 함께 남겨주시면, 두 사람의 사주를 함께 짚어보는 재회운 풀이도 무료로 함께 진행해드립니다.</p>
-      <div class="reunion-cta">
-        <a class="btn-primary" href="#applyForm" style="background:linear-gradient(135deg, #e8a89e, var(--vermillion));box-shadow:0 10px 30px -10px rgba(183,64,47,0.55);">재회운 함께 신청하기</a>
+      <div class="reunion-video">
+        <video controls playsinline preload="metadata">
+          <source src="reunion-video.mp4" type="video/mp4">
+          브라우저가 동영상 재생을 지원하지 않습니다.
+        </video>
       </div>
     </div>
   </section>
@@ -376,13 +415,21 @@
               </div>
             </div>
           </div>
-          <input type="date" id="f-birth" required>
+          <div class="picker-trigger" id="birthTrigger" tabindex="0" role="button">
+            <span id="birthDisplay" class="picker-placeholder">날짜를 선택해주세요</span>
+            <svg class="picker-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c9a24b" stroke-width="1.6"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+          </div>
+          <input type="hidden" id="f-birth">
         </div>
 
         <div class="field">
           <label for="f-time">태어난 시간</label>
           <div class="row2">
-            <input type="time" id="f-time">
+            <div class="picker-trigger" id="timeTrigger" tabindex="0" role="button">
+              <span id="timeDisplay" class="picker-placeholder">시간을 선택해주세요</span>
+              <svg class="picker-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c9a24b" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+            </div>
+            <input type="hidden" id="f-time">
             <div class="radio-pill">
               <input type="checkbox" id="f-time-unknown">
               <label for="f-time-unknown" style="display:flex;align-items:center;justify-content:center;height:100%;">시간 모름</label>
@@ -429,8 +476,12 @@
               </div>
             </div>
             <div class="field" style="margin-bottom:16px;">
-              <label for="f-ex-birth">상대방 생년월일</label>
-              <input type="date" id="f-ex-birth">
+              <label>상대방 생년월일</label>
+              <div class="picker-trigger" id="exBirthTrigger" tabindex="0" role="button">
+                <span id="exBirthDisplay" class="picker-placeholder">날짜를 선택해주세요</span>
+                <svg class="picker-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c9a24b" stroke-width="1.6"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+              </div>
+              <input type="hidden" id="f-ex-birth">
             </div>
             <div class="field" style="margin-bottom:0;">
               <label for="f-breakup">헤어진 시기 (대략적으로)</label>
@@ -490,6 +541,39 @@
   <div id="adminTableWrap" class="wrap"></div>
 </div>
 
+<!-- ===== 날짜 선택 모달 ===== -->
+<div id="calendarOverlay" class="picker-overlay">
+  <div class="picker-box">
+    <p class="picker-title">생년월일 선택</p>
+    <div class="picker-head">
+      <select id="calYear"></select>
+      <select id="calMonth"></select>
+    </div>
+    <div class="cal-weekdays"><span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span></div>
+    <div class="cal-grid" id="calGrid"></div>
+    <div class="picker-actions">
+      <button type="button" class="picker-cancel" onclick="closeCalendar()">취소</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 시간 선택 모달 ===== -->
+<div id="timeOverlay" class="picker-overlay">
+  <div class="picker-box">
+    <p class="picker-title">태어난 시간 선택</p>
+    <div class="picker-head" style="justify-content:center;align-items:center;">
+      <select id="timeHour"></select>
+      <span style="color:var(--parchment-dim);font-size:13px;">시</span>
+      <select id="timeMinute"></select>
+      <span style="color:var(--parchment-dim);font-size:13px;">분</span>
+    </div>
+    <div class="picker-actions">
+      <button type="button" class="picker-cancel" onclick="closeTimeModal()">취소</button>
+      <button type="button" class="submit-btn picker-confirm" onclick="confirmTime()">확인</button>
+    </div>
+  </div>
+</div>
+
 <script>
 /* 관리자 비밀번호는 여기서 변경하세요 */
 const ADMIN_PASSWORD = "0000";
@@ -526,12 +610,125 @@ const STORAGE_KEY = "myeongundang_leads";
   targets.forEach(t=>io.observe(t));
 })();
 
+/* ---------- date/time picker: 날짜·시간 선택 모달 ---------- */
+const CURRENT_YEAR = new Date().getFullYear();
+let calendarTarget = null; // { hiddenId, displayId }
+let calSelectedYear, calSelectedMonth, calSelectedDay;
+
+function initPickerSelects(){
+  const yearSel = document.getElementById('calYear');
+  for(let y = CURRENT_YEAR; y >= CURRENT_YEAR - 100; y--){
+    const opt = document.createElement('option');
+    opt.value = y; opt.textContent = y + '년';
+    yearSel.appendChild(opt);
+  }
+  const monthSel = document.getElementById('calMonth');
+  for(let m = 1; m <= 12; m++){
+    const opt = document.createElement('option');
+    opt.value = m; opt.textContent = m + '월';
+    monthSel.appendChild(opt);
+  }
+  const hourSel = document.getElementById('timeHour');
+  for(let h = 0; h <= 23; h++){
+    const opt = document.createElement('option');
+    opt.value = h; opt.textContent = String(h).padStart(2,'0');
+    hourSel.appendChild(opt);
+  }
+  const minSel = document.getElementById('timeMinute');
+  for(let mm = 0; mm <= 59; mm++){
+    const opt = document.createElement('option');
+    opt.value = mm; opt.textContent = String(mm).padStart(2,'0');
+    minSel.appendChild(opt);
+  }
+  yearSel.addEventListener('change', ()=>{ calSelectedYear = parseInt(yearSel.value); renderCalGrid(); });
+  monthSel.addEventListener('change', ()=>{ calSelectedMonth = parseInt(monthSel.value); renderCalGrid(); });
+}
+
+function openCalendar(hiddenId, displayId){
+  calendarTarget = { hiddenId, displayId };
+  const existing = document.getElementById(hiddenId).value;
+  const base = existing ? new Date(existing) : new Date(CURRENT_YEAR - 30, 0, 1);
+  calSelectedYear = existing ? base.getFullYear() : CURRENT_YEAR - 30;
+  calSelectedMonth = existing ? base.getMonth() + 1 : 1;
+  calSelectedDay = existing ? base.getDate() : null;
+  document.getElementById('calYear').value = calSelectedYear;
+  document.getElementById('calMonth').value = calSelectedMonth;
+  renderCalGrid();
+  document.getElementById('calendarOverlay').style.display = 'flex';
+}
+function closeCalendar(){
+  document.getElementById('calendarOverlay').style.display = 'none';
+  calendarTarget = null;
+}
+function renderCalGrid(){
+  const grid = document.getElementById('calGrid');
+  grid.innerHTML = '';
+  const firstDay = new Date(calSelectedYear, calSelectedMonth - 1, 1).getDay();
+  const daysInMonth = new Date(calSelectedYear, calSelectedMonth, 0).getDate();
+  for(let i = 0; i < firstDay; i++){
+    const empty = document.createElement('div');
+    empty.className = 'cal-day empty';
+    grid.appendChild(empty);
+  }
+  for(let d = 1; d <= daysInMonth; d++){
+    const btn = document.createElement('div');
+    btn.className = 'cal-day' + (d === calSelectedDay ? ' selected' : '');
+    btn.textContent = d;
+    btn.onclick = ()=> selectCalDay(d);
+    grid.appendChild(btn);
+  }
+}
+function selectCalDay(d){
+  calSelectedDay = d;
+  const mm = String(calSelectedMonth).padStart(2,'0');
+  const dd = String(d).padStart(2,'0');
+  const isoValue = `${calSelectedYear}-${mm}-${dd}`;
+  document.getElementById(calendarTarget.hiddenId).value = isoValue;
+  const displayEl = document.getElementById(calendarTarget.displayId);
+  displayEl.textContent = `${calSelectedYear}년 ${calSelectedMonth}월 ${d}일`;
+  displayEl.classList.remove('picker-placeholder');
+  closeCalendar();
+}
+
+let timeConfirmTargetHidden = 'f-time', timeConfirmTargetDisplay = 'timeDisplay';
+function openTimeModal(){
+  const existing = document.getElementById(timeConfirmTargetHidden).value;
+  const [h, m] = existing ? existing.split(':').map(Number) : [12, 0];
+  document.getElementById('timeHour').value = h;
+  document.getElementById('timeMinute').value = m;
+  document.getElementById('timeOverlay').style.display = 'flex';
+}
+function closeTimeModal(){
+  document.getElementById('timeOverlay').style.display = 'none';
+}
+function confirmTime(){
+  const h = document.getElementById('timeHour').value.padStart(2,'0');
+  const m = document.getElementById('timeMinute').value.padStart(2,'0');
+  document.getElementById(timeConfirmTargetHidden).value = `${h}:${m}`;
+  const displayEl = document.getElementById(timeConfirmTargetDisplay);
+  displayEl.textContent = `${h}시 ${m}분`;
+  displayEl.classList.remove('picker-placeholder');
+  closeTimeModal();
+}
+
+initPickerSelects();
+document.getElementById('birthTrigger').addEventListener('click', ()=> openCalendar('f-birth','birthDisplay'));
+document.getElementById('exBirthTrigger').addEventListener('click', ()=> openCalendar('f-ex-birth','exBirthDisplay'));
+document.getElementById('timeTrigger').addEventListener('click', openTimeModal);
+
 /* ---------- time-unknown toggle ---------- */
-const timeInput = document.getElementById('f-time');
 const timeUnknown = document.getElementById('f-time-unknown');
+const timeTrigger = document.getElementById('timeTrigger');
 timeUnknown.addEventListener('change', ()=>{
-  timeInput.disabled = timeUnknown.checked;
-  if(timeUnknown.checked) timeInput.value = '';
+  if(timeUnknown.checked){
+    timeTrigger.classList.add('disabled');
+    document.getElementById('f-time').value = '';
+    const d = document.getElementById('timeDisplay');
+    d.textContent = '시간을 선택해주세요';
+    d.classList.add('picker-placeholder');
+  } else {
+    timeTrigger.classList.remove('disabled');
+  }
 });
 
 /* ---------- 이름: 한글만 입력 허용 ---------- */
@@ -571,6 +768,11 @@ leadForm.addEventListener('submit', function(e){
     return;
   }
 
+  if(!document.getElementById('f-birth').value){
+    alert('생년월일을 선택해주세요');
+    return;
+  }
+
   const lead = {
     id: Date.now(),
     submittedAt: new Date().toLocaleString('ko-KR'),
@@ -578,7 +780,7 @@ leadForm.addEventListener('submit', function(e){
     gender: (document.querySelector('input[name=gender]:checked')||{}).value || '',
     calendar: (document.querySelector('input[name=calendar]:checked')||{}).value || '',
     birth: document.getElementById('f-birth').value,
-    time: timeUnknown.checked ? '모름' : (timeInput.value || '미입력'),
+    time: timeUnknown.checked ? '모름' : (document.getElementById('f-time').value || '미입력'),
     phone: document.getElementById('f-phone').value.trim(),
     kakao: document.getElementById('f-kakao').value.trim(),
     interests: interests,
