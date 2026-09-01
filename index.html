@@ -579,6 +579,11 @@
         </div>
 
         <div class="field">
+          <label for="f-email">이메일 주소 (선택)</label>
+          <input type="email" id="f-email" placeholder="example@email.com">
+        </div>
+
+        <div class="field">
           <label>받고 싶은 상담을 선택해주세요 (중복 선택 가능)</label>
           <div class="interest-grid">
             <div class="check-pill"><input type="checkbox" name="interest" id="int-reunion" value="재회운"><label for="int-reunion">재회운</label></div>
@@ -986,6 +991,7 @@ leadForm.addEventListener('submit', async function(e){
     time: timeUnknown.checked ? '모름' : (document.getElementById('f-time').value || '미입력'),
     phone: document.getElementById('f-phone').value.trim(),
     kakao: document.getElementById('f-kakao').value.trim(),
+    email: document.getElementById('f-email').value.trim(),
     interests: interests,
     reunionWish: interestReunion.checked,
     exGender: interestReunion.checked ? ((document.querySelector('input[name=exGender]:checked')||{}).value || '') : '',
@@ -1281,7 +1287,7 @@ async function renderAdminTable(){
     wrap.innerHTML = '<div class="empty-state">아직 접수된 신청서가 없습니다</div>';
     return;
   }
-  let html = '<table><thead><tr><th>신청일시</th><th>이름</th><th>성별</th><th>양/음력</th><th>생년월일</th><th>시간</th><th>연락처</th><th>카카오톡</th><th>관심 상담</th><th>상대방 성별</th><th>상대방 생년월일</th><th>헤어진 시기</th><th>상황 설명</th><th></th></tr></thead><tbody>';
+  let html = '<table><thead><tr><th>신청일시</th><th>이름</th><th>성별</th><th>양/음력</th><th>생년월일</th><th>시간</th><th>연락처</th><th>카카오톡</th><th>이메일</th><th>관심 상담</th><th>상대방 성별</th><th>상대방 생년월일</th><th>헤어진 시기</th><th>상황 설명</th><th></th></tr></thead><tbody>';
   leads.forEach(l=>{
     html += `<tr>
       <td>${l.submittedAt}</td>
@@ -1292,6 +1298,7 @@ async function renderAdminTable(){
       <td>${l.time}</td>
       <td>${l.phone}</td>
       <td>${l.kakao || '-'}</td>
+      <td>${l.email || '-'}</td>
       <td>${(l.interests && l.interests.join(', ')) || '-'}</td>
       <td>${l.exGender || '-'}</td>
       <td>${l.exBirth || '-'}</td>
@@ -1335,9 +1342,9 @@ async function exportCSV(){
     return;
   }
   if(leads.length === 0){ alert('다운로드할 데이터가 없습니다'); return; }
-  const headers = ['신청일시','이름','성별','양음력','생년월일','시간','연락처','카카오톡','관심상담','상대방성별','상대방생년월일','헤어진시기','상황설명'];
+  const headers = ['신청일시','이름','성별','양음력','생년월일','시간','연락처','카카오톡','이메일','관심상담','상대방성별','상대방생년월일','헤어진시기','상황설명'];
   const csvField = v => '"' + String(v==null?'':v).replace(/"/g,'""') + '"';
-  const rows = leads.map(l=>[l.submittedAt,l.name,l.gender,l.calendar,l.birth,l.time,l.phone,l.kakao,(l.interests||[]).join('/'),l.exGender||'',l.exBirth||'',l.breakup||'',l.situation||''].map(csvField).join(','));
+  const rows = leads.map(l=>[l.submittedAt,l.name,l.gender,l.calendar,l.birth,l.time,l.phone,l.kakao,l.email||'',(l.interests||[]).join('/'),l.exGender||'',l.exBirth||'',l.breakup||'',l.situation||''].map(csvField).join(','));
   const csv = '\uFEFF' + [headers.map(csvField).join(','), ...rows].join('\n');
   const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
   const url = URL.createObjectURL(blob);
