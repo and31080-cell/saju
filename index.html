@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -547,12 +548,9 @@ interestReunion.addEventListener('change', ()=>{
 });
 
 /* ---------- 이메일 알림 설정 ----------
-   Formspree(무료)를 이용해 신청서가 접수될 때마다 아래 주소로 메일이 전송됩니다.
-   1) https://formspree.io 에서 and31080@naver.com 으로 무료 계정을 만들고
-   2) 새 Form을 생성한 뒤 발급되는 주소(https://formspree.io/f/xxxxxxx)를
-   3) 아래 FORMSPREE_ENDPOINT 값에 그대로 붙여넣으면 바로 작동합니다.
-   설정 전까지는 신청 내역이 이 페이지의 관리자 화면(localStorage)에만 저장됩니다. */
-const FORMSPREE_ENDPOINT = "https://formspree.io/f/YOUR_FORM_ID";
+   Formspree(무료) 연동 완료 — 신청서가 접수될 때마다 and31080@naver.com 으로 메일이 전송됩니다.
+   주소를 바꾸고 싶으면 FORMSPREE_ENDPOINT 값을 새로 발급받은 주소로 교체하세요. */
+const FORMSPREE_ENDPOINT = "https://formspree.io/f/mvkokrjv";
 const NOTIFY_EMAIL = "and31080@naver.com";
 
 /* ---------- form submit ---------- */
