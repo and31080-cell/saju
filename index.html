@@ -2,12 +2,20 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta name="naver-site-verification" content="d893bab511dabf72d91c24bebd372513d37348d6" />
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>명운당 | 무료 사주풀이 신청</title>
 <meta name="description" content="생년월일시 네 글자에 새겨진 당신의 운명, 명운당에서 무료로 풀이해드립니다.">
-<meta name="robots" content="noindex, nofollow">
+<meta name="robots" content="index, follow">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta property="og:title" content="명운당 | 무료 사주풀이 신청">
+<meta property="og:description" content="생년월일시 네 글자에 새겨진 당신의 운명, 명운당에서 무료로 풀이해드립니다.">
+<meta property="og:image" content="symbol_logo.png">
+<meta property="og:type" content="website">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Song+Myung&family=Gowun+Batang:wght@400;700&family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
@@ -207,6 +215,15 @@
     width:100%;display:block;background:#000;border-radius:18px;
     border:1px solid rgba(183,64,47,0.4);
     box-shadow:0 20px 50px -20px rgba(183,64,47,0.55);
+    opacity:0;transition:opacity .5s ease;
+  }
+  .reunion-video video.is-playing{opacity:1;}
+  /* 모바일(특히 iOS Safari)에서 자동재생 직전에 잠깐 노출되는
+     기본 재생 버튼 오버레이를 감춥니다 */
+  .reunion-video video::-webkit-media-controls,
+  .reunion-video video::-webkit-media-controls-start-playback-button,
+  .reunion-video video::-webkit-media-controls-panel{
+    display:none !important;-webkit-appearance:none;opacity:0 !important;
   }
 
   .reasons{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
@@ -322,7 +339,26 @@
   footer{padding:48px 0 32px;text-align:center;border-top:1px solid var(--line);}
   footer .foot-logo{font-family:'Gowun Batang',serif;font-size:16px;color:var(--gold-soft);margin-bottom:8px;}
   footer p{font-size:11.5px;color:var(--parchment-dim);margin:4px 0;}
-  footer .admin-link{display:inline-block;margin-top:18px;font-size:11px;color:#4a4636;text-decoration:none;}
+  footer .foot-links{margin-top:18px;display:flex;align-items:center;justify-content:center;gap:14px;}
+  footer .admin-link{display:inline-block;font-size:11px;color:#4a4636;text-decoration:none;}
+  footer .kakao-link{display:inline-block;font-size:11px;color:var(--parchment-dim);text-decoration:none;}
+  footer .kakao-link:hover{color:var(--gold-soft);}
+
+  /* ---------- 카카오톡 플로팅 버튼 (하단 우측 고정) ---------- */
+  .kakao-float{
+    position:fixed;right:22px;bottom:22px;z-index:70;
+    width:56px;height:56px;border-radius:50%;
+    background:#FEE500;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 12px 26px -8px rgba(0,0,0,0.55);
+    text-decoration:none;transition:transform .2s ease, box-shadow .2s ease;
+  }
+  .kakao-float:hover{transform:translateY(-3px);box-shadow:0 16px 30px -8px rgba(0,0,0,0.6);}
+  .kakao-float svg{width:28px;height:28px;display:block;}
+  @media (max-width:600px){
+    .kakao-float{right:16px;bottom:16px;width:50px;height:50px;}
+    .kakao-float svg{width:25px;height:25px;}
+  }
 
   @media (max-width:720px){
     .reasons{grid-template-columns:1fr;}
@@ -362,6 +398,28 @@
   th{color:var(--gold-soft);font-weight:700;}
   td.del{cursor:pointer;color:#e8a89e;}
   .empty-state{text-align:center;color:var(--parchment-dim);padding:60px 0;}
+
+  /* ---------- admin: 홈페이지 문구 관리 ---------- */
+  .settings-intro{font-size:13px;color:var(--parchment-dim);margin:0 0 20px;}
+  .settings-group{border:1px solid var(--line);border-radius:14px;margin-bottom:14px;overflow:hidden;background:var(--midnight);}
+  .settings-group summary{
+    cursor:pointer;padding:15px 18px;font-size:14.5px;font-weight:700;color:var(--gold-soft);
+    list-style:none;display:flex;align-items:center;justify-content:space-between;
+  }
+  .settings-group summary::-webkit-details-marker{display:none;}
+  .settings-group summary::after{content:'+';font-size:18px;color:var(--parchment-dim);transition:transform .2s ease;}
+  .settings-group[open] summary::after{content:'−';}
+  .settings-group .settings-body{padding:4px 18px 18px;border-top:1px solid var(--line);}
+  .settings-field{margin-top:16px;}
+  .settings-field label{display:block;font-size:12.5px;color:var(--parchment-dim);margin-bottom:6px;}
+  .settings-field textarea, .settings-field input[type=text]{
+    width:100%;padding:11px 13px;border-radius:10px;border:1px solid var(--line);
+    background:var(--ink);color:var(--parchment);font-size:14px;font-family:inherit;resize:vertical;
+  }
+  .settings-save-bar{
+    position:sticky;bottom:0;display:flex;justify-content:flex-end;gap:10px;
+    padding:14px 0 4px;margin-top:6px;background:linear-gradient(0deg, var(--ink) 60%, transparent);
+  }
 </style>
 </head>
 <body>
@@ -370,28 +428,31 @@
 
 <header class="nav">
   <div class="nav-inner">
-    <div class="logo">명운당<small>命 運 堂</small></div>
-    <button class="nav-cta" onclick="document.getElementById('applyForm').scrollIntoView({behavior:'smooth'})">무료 사주풀이</button>
+    <div class="logo" style="display:flex;align-items:center;gap:10px;">
+      <img src="symbol_logo.png" alt="명운당 심볼" style="height:36px;width:auto;display:block;">
+      <span>명운당<small>命 運 堂</small></span>
+    </div>
+    <button class="nav-cta" id="navCtaBtn" onclick="document.getElementById('applyForm').scrollIntoView({behavior:'smooth'})">무료 사주풀이</button>
   </div>
 </header>
 
 <main>
   <section class="hero wrap">
-    <span class="eyebrow">무료 사주풀이 이벤트</span>
-    <h1>年 · 月 · 日 · 時<br>네 개의 기둥에 새겨진<br><span class="accent">당신의 운명을 풀어드립니다</span></h1>
-    <p class="hero-sub">생년월일시 네 글자만으로 완성되는 사주팔자. 명운당 정통 명리학자가 당신의 사주 원국을 무료로 풀이해드립니다.</p>
-    <a class="btn-primary" href="#applyForm">무료로 사주풀이 신청하기</a>
-    <p class="hero-note">신청 후 24시간 이내 카카오톡 또는 전화로 결과를 안내드립니다</p>
+    <span class="eyebrow" id="heroEyebrow">무료 사주풀이 이벤트</span>
+    <h1 id="heroTitle">年 · 月 · 日 · 時<br>네 개의 기둥에 새겨진<br><span class="accent">당신의 운명을 풀어드립니다</span></h1>
+    <p class="hero-sub" id="heroSub">생년월일시 네 글자만으로 완성되는 사주팔자. 명운당 정통 명리학자가 당신의 사주 원국을 무료로 풀이해드립니다.</p>
+    <a class="btn-primary" id="heroBtn" href="#applyForm">무료로 사주풀이 신청하기</a>
+    <p class="hero-note" id="heroNote">신청 후 24시간 이내 카카오톡 또는 전화로 결과를 안내드립니다</p>
 
     <div class="chart-wrap">
-      <p class="chart-label">사주 명식 예시 (SAMPLE)</p>
+      <p class="chart-label" id="chartLabel">사주 명식 예시 (SAMPLE)</p>
       <div class="pillars" id="pillars">
         <div class="pillar"><div class="name">시주 時</div><div class="hanja">庚</div><div class="hanja jiji">午</div></div>
         <div class="pillar"><div class="name">일주 日</div><div class="hanja">戊</div><div class="hanja jiji">辰</div></div>
         <div class="pillar"><div class="name">월주 月</div><div class="hanja">丙</div><div class="hanja jiji">寅</div></div>
         <div class="pillar"><div class="name">년주 年</div><div class="hanja">甲</div><div class="hanja jiji">子</div></div>
       </div>
-      <p class="chart-caption">신청서를 남기시면 당신만의 사주 원국을 직접 풀이해드립니다</p>
+      <p class="chart-caption" id="chartCaption">신청서를 남기시면 당신만의 사주 원국을 직접 풀이해드립니다</p>
     </div>
   </section>
 
@@ -399,18 +460,18 @@
     <div class="wrap">
       <div class="section-head">
         <div class="reunion-glyph">重逢</div>
-        <div class="section-eyebrow" style="color:#e8a89e;">재회운 특화 상담</div>
-        <h2 class="section-title">헤어진 그 사람,<br>정말 다시 만날 수 있을까요?</h2>
-        <p class="section-desc">재회는 감정만으로는 알 수 없습니다. 두 사람이 다시 이어지는 시기와 방식은 사주에 이미 새겨져 있습니다. 상담을 받으신 많은 분들이 "어떻게 이렇게까지 맞을까" 놀라시는 부분이 바로 재회운입니다.</p>
+        <div class="section-eyebrow" id="reunionEyebrow" style="color:#e8a89e;">재회운 특화 상담</div>
+        <h2 class="section-title" id="reunionTitle">헤어진 그 사람,<br>정말 다시 만날 수 있을까요?</h2>
+        <p class="section-desc" id="reunionDesc">재회는 감정만으로는 알 수 없습니다. 두 사람이 다시 이어지는 시기와 방식은 사주에 이미 새겨져 있습니다. 상담을 받으신 많은 분들이 "어떻게 이렇게까지 맞을까" 놀라시는 부분이 바로 재회운입니다.</p>
       </div>
       <div class="reunion-points" id="reunionPoints">
-        <div class="reunion-point"><div class="num">01</div><h3>재회 가능 시기</h3><p>다시 연락이 닿거나 마주칠 수 있는 시기를 짚어드립니다.</p></div>
-        <div class="reunion-point"><div class="num">02</div><h3>재회를 막는 걸림돌</h3><p>두 사람 사이에 아직 남아있는 감정과 오해의 기운을 확인합니다.</p></div>
-        <div class="reunion-point"><div class="num">03</div><h3>다가가는 방법과 타이밍</h3><p>먼저 연락해도 좋을 때와 기다려야 할 때를 알려드립니다.</p></div>
+        <div class="reunion-point"><div class="num">01</div><h3 id="reunionP1Title">재회 가능 시기</h3><p id="reunionP1Desc">다시 연락이 닿거나 마주칠 수 있는 시기를 짚어드립니다.</p></div>
+        <div class="reunion-point"><div class="num">02</div><h3 id="reunionP2Title">재회를 막는 걸림돌</h3><p id="reunionP2Desc">두 사람 사이에 아직 남아있는 감정과 오해의 기운을 확인합니다.</p></div>
+        <div class="reunion-point"><div class="num">03</div><h3 id="reunionP3Title">다가가는 방법과 타이밍</h3><p id="reunionP3Desc">먼저 연락해도 좋을 때와 기다려야 할 때를 알려드립니다.</p></div>
       </div>
-      <p class="reunion-note">신청서에 헤어진 상대방의 정보를 함께 남겨주시면, 두 사람의 사주를 함께 짚어보는 재회운 풀이도 무료로 함께 진행해드립니다.</p>
+      <p class="reunion-note" id="reunionNote">신청서에 헤어진 상대방의 정보를 함께 남겨주시면, 두 사람의 사주를 함께 짚어보는 재회운 풀이도 무료로 함께 진행해드립니다.</p>
       <div class="reunion-video">
-        <video autoplay muted loop playsinline preload="auto">
+        <video id="reunionVideo" autoplay muted loop playsinline webkit-playsinline="true" x5-playsinline="true" disablePictureInPicture disableRemotePlayback preload="auto">
           <source src="reunion-video.mp4" type="video/mp4">
           브라우저가 동영상 재생을 지원하지 않습니다.
         </video>
@@ -420,33 +481,33 @@
 
   <section class="wrap">
     <div class="section-head">
-      <h2 class="section-title">왜 사주를 봐야 할까요</h2>
-      <p class="section-desc">태어난 순간의 기운은 평생 바뀌지 않는 나만의 지도입니다</p>
+      <h2 class="section-title" id="reasonsTitle">왜 사주를 봐야 할까요</h2>
+      <p class="section-desc" id="reasonsDesc">태어난 순간의 기운은 평생 바뀌지 않는 나만의 지도입니다</p>
     </div>
     <div class="reasons" id="reasons">
-      <div class="reason-card"><div class="reason-glyph">緣</div><h3>인연과 애정운</h3><p>지금 만나는 사람과의 궁합, 다가올 인연의 시기를 확인해보세요.</p></div>
-      <div class="reason-card"><div class="reason-glyph">財</div><h3>재물과 사업운</h3><p>돈이 들어오고 나가는 흐름, 지금이 투자와 결정의 적기인지 짚어드립니다.</p></div>
-      <div class="reason-card"><div class="reason-glyph">健</div><h3>건강과 시기운</h3><p>몸과 마음이 약해지기 쉬운 시기를 미리 알면 준비할 수 있습니다.</p></div>
+      <div class="reason-card"><div class="reason-glyph">緣</div><h3 id="reason1Title">인연과 애정운</h3><p id="reason1Desc">지금 만나는 사람과의 궁합, 다가올 인연의 시기를 확인해보세요.</p></div>
+      <div class="reason-card"><div class="reason-glyph">財</div><h3 id="reason2Title">재물과 사업운</h3><p id="reason2Desc">돈이 들어오고 나가는 흐름, 지금이 투자와 결정의 적기인지 짚어드립니다.</p></div>
+      <div class="reason-card"><div class="reason-glyph">健</div><h3 id="reason3Title">건강과 시기운</h3><p id="reason3Desc">몸과 마음이 약해지기 쉬운 시기를 미리 알면 준비할 수 있습니다.</p></div>
     </div>
   </section>
 
   <section class="wrap process">
     <div class="section-head">
-      <div class="section-eyebrow">HOW IT WORKS</div>
-      <h2 class="section-title">신청부터 상담까지</h2>
+      <div class="section-eyebrow" id="processEyebrow">HOW IT WORKS</div>
+      <h2 class="section-title" id="processTitle">신청부터 상담까지</h2>
     </div>
     <div class="steps" id="steps">
-      <div class="step"><div class="step-num">一</div><div><h3>신청서 작성</h3><p>생년월일시와 연락처를 남겨주세요. 정확할수록 풀이도 정밀해집니다.</p></div></div>
-      <div class="step"><div class="step-num">二</div><div><h3>사주 원국 분석</h3><p>명리학자가 사주팔자와 오행의 균형을 꼼꼼히 짚어봅니다.</p></div></div>
-      <div class="step"><div class="step-num">三</div><div><h3>카카오톡·전화 상담</h3><p>24시간 이내 풀이 결과를 편하신 방법으로 안내드립니다.</p></div></div>
+      <div class="step"><div class="step-num">一</div><div><h3 id="step1Title">신청서 작성</h3><p id="step1Desc">생년월일시와 연락처를 남겨주세요. 정확할수록 풀이도 정밀해집니다.</p></div></div>
+      <div class="step"><div class="step-num">二</div><div><h3 id="step2Title">사주 원국 분석</h3><p id="step2Desc">명리학자가 사주팔자와 오행의 균형을 꼼꼼히 짚어봅니다.</p></div></div>
+      <div class="step"><div class="step-num">三</div><div><h3 id="step3Title">카카오톡·전화 상담</h3><p id="step3Desc">24시간 이내 풀이 결과를 편하신 방법으로 안내드립니다.</p></div></div>
     </div>
   </section>
 
   <section class="wrap form-section" id="applyForm">
     <div class="section-head">
-      <div class="section-eyebrow">FREE APPLICATION</div>
-      <h2 class="section-title">무료 사주풀이 신청</h2>
-      <p class="section-desc">아래 정보를 남겨주시면 순서대로 연락드립니다</p>
+      <div class="section-eyebrow" id="formEyebrow">FREE APPLICATION</div>
+      <h2 class="section-title" id="formTitle">무료 사주풀이 신청</h2>
+      <p class="section-desc" id="formDesc">아래 정보를 남겨주시면 순서대로 연락드립니다</p>
     </div>
 
     <div class="form-card">
@@ -562,39 +623,48 @@
 
         <div class="checkbox-row">
           <input type="checkbox" id="f-agree" required>
-          <label for="f-agree">사주풀이 상담을 위해 남겨주신 개인정보(이름, 생년월일시, 연락처)를 수집·이용하는 것에 동의합니다. 수집된 정보는 상담 목적 외에는 사용되지 않으며, 상담 완료 후 안전하게 폐기됩니다.</label>
+          <label for="f-agree" id="agreeText">사주풀이 상담을 위해 남겨주신 개인정보(이름, 생년월일시, 연락처)를 수집·이용하는 것에 동의합니다. 수집된 정보는 상담 목적 외에는 사용되지 않으며, 상담 완료 후 안전하게 폐기됩니다.</label>
         </div>
 
         <button type="submit" class="submit-btn" id="submitBtn">무료 사주풀이 신청하기</button>
-        <p class="form-foot-note">신청서는 결제나 회원가입 없이 무료로 진행됩니다</p>
+        <p class="form-foot-note" id="formFootNote">신청서는 결제나 회원가입 없이 무료로 진행됩니다</p>
       </form>
 
       <div class="success-box" id="successBox">
         <div class="mark">申</div>
-        <h3>신청이 완료되었습니다</h3>
-        <p>남겨주신 연락처로 24시간 이내에<br>사주풀이 결과를 안내드리겠습니다.</p>
+        <h3 id="successTitle">신청이 완료되었습니다</h3>
+        <p id="successDesc">남겨주신 연락처로 24시간 이내에<br>사주풀이 결과를 안내드리겠습니다.</p>
       </div>
     </div>
   </section>
 
   <footer class="wrap">
     <div class="foot-logo">명운당 命運堂</div>
-    <p>본 페이지는 상담 신청 접수를 위한 안내 페이지입니다.</p>
+    <p id="footerNotice">본 페이지는 상담 신청 접수를 위한 안내 페이지입니다.</p>
     <p id="footBizInfo">상호 · 사업자등록번호 · 주소 등 실제 정보로 교체해주세요.</p>
-    <a href="#admin" class="admin-link">관리자</a>
+    <div class="foot-links">
+      <a href="#" id="footKakaoLink" class="kakao-link" target="_blank" rel="noopener noreferrer" onclick="return guardKakaoLink(this)">카카오톡 상담하기</a>
+      <a href="#admin" class="admin-link">관리자</a>
+    </div>
   </footer>
 </main>
+
+<!-- ===== 카카오톡 플로팅 버튼 ===== -->
+<a href="#" id="kakaoFloatBtn" class="kakao-float" target="_blank" rel="noopener noreferrer" aria-label="카카오톡 상담하기" onclick="return guardKakaoLink(this)">
+  <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <path fill="#391B1B" d="M16 6C9.373 6 4 10.24 4 15.47c0 3.31 2.17 6.22 5.44 7.9-.24.86-.87 3.1-1 3.58-.16.6.22.6.46.44.19-.13 3.03-2.02 4.26-2.84.92.13 1.87.2 2.84.2 6.627 0 12-4.24 12-9.47C28 10.24 22.627 6 16 6z"/>
+  </svg>
+</a>
 
 <!-- ===== Admin: password gate ===== -->
 <div id="adminOverlay">
   <div class="admin-box">
     <div class="foot-logo" style="margin-bottom:6px;">관리자 접속</div>
     <p style="font-size:13px;color:var(--parchment-dim);margin:0;">신청 내역을 확인하려면 비밀번호를 입력하세요</p>
-    <input type="text" id="adminPw" placeholder="비밀번호">
+    <input type="password" id="adminPw" placeholder="비밀번호" onkeydown="if(event.key==='Enter') checkAdminPw()">
     <div>
       <button class="submit-btn" style="width:auto;padding:12px 28px;" onclick="checkAdminPw()">확인</button>
     </div>
-    <p style="font-size:11px;color:#665f4d;margin-top:14px;">기본 비밀번호는 코드 상단 주석을 확인하세요</p>
   </div>
 </div>
 
@@ -620,16 +690,11 @@
     <div id="adminTableWrap" class="wrap"></div>
   </div>
 
-  <div id="adminTabSettings" class="wrap" style="display:none;max-width:640px;">
-    <div class="form-card" style="max-width:none;">
-      <div class="field" style="margin-bottom:0;">
-        <label for="settingBizInfo">푸터 사업자 정보 문구</label>
-        <textarea id="settingBizInfo" rows="3" placeholder="예: 상호 명운당 | 대표 홍길동 | 사업자등록번호 000-00-00000 | 주소 ..." style="width:100%;padding:13px 14px;border-radius:10px;border:1px solid var(--line);background:var(--ink);color:var(--parchment);font-size:14.5px;font-family:inherit;resize:vertical;"></textarea>
-        <div class="hint">페이지 맨 아래 사업자 정보 문구입니다. 저장하면 바로 반영됩니다.</div>
-      </div>
-      <div style="margin-top:14px;text-align:right;">
-        <button class="submit-btn" style="width:auto;padding:11px 24px;" onclick="saveSiteSettings()">저장</button>
-      </div>
+  <div id="adminTabSettings" class="wrap" style="display:none;max-width:680px;">
+    <p class="settings-intro">홈페이지에 노출되는 문구를 섹션별로 모아두었습니다. 항목을 눌러 펼친 뒤 원하는 문구로 바꾸고 맨 아래 저장 버튼을 누르면 바로 반영됩니다. 줄을 바꾸고 싶으면 그냥 Enter를 눌러 입력하세요.</p>
+    <div id="settingsFieldsWrap"></div>
+    <div class="settings-save-bar">
+      <button class="submit-btn" style="width:auto;padding:11px 24px;" onclick="saveSiteSettings()">전체 저장</button>
     </div>
   </div>
 </div>
@@ -668,8 +733,16 @@
 </div>
 
 <script>
-/* 관리자 비밀번호는 여기서 변경하세요 */
-const ADMIN_PASSWORD = "0000";
+/* 관리자 비밀번호는 평문이 아니라 해시(SHA-256)로 저장되어 있어
+   코드를 열어봐도 실제 비밀번호를 알 수 없습니다.
+   비밀번호를 바꾸려면 브라우저 콘솔(F12)에서 아래처럼 실행한 뒤
+   나온 값을 ADMIN_PASSWORD_HASH 자리에 붙여넣으세요.
+   예) await sha256Hex('새비밀번호') */
+const ADMIN_PASSWORD_HASH = "5246272819cf9d3f50bdf7d03ac84ed65e5604ae8b4cd831e027813a258e03fc";
+async function sha256Hex(text){
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
 const STORAGE_KEY = "myeongundang_leads";
 
 /* ---------- ambient stars ---------- */
@@ -701,6 +774,29 @@ const STORAGE_KEY = "myeongundang_leads";
     });
   }, {threshold:0.2});
   targets.forEach(t=>io.observe(t));
+})();
+
+/* ---------- 재회 영상: 모바일에서 재생 버튼 깜빡임 없이 바로 재생 ----------
+   영상이 실제로 재생을 시작(playing)하기 전까지는 투명하게 감춰두고,
+   재생이 시작되는 순간에만 살며시 나타나도록 해서
+   로딩 중 잠깐 보이는 재생 버튼이 눈에 띄지 않게 합니다. */
+(function(){
+  const vid = document.getElementById('reunionVideo');
+  if(!vid) return;
+  function markPlaying(){ vid.classList.add('is-playing'); }
+  vid.addEventListener('playing', markPlaying);
+  if(!vid.paused && vid.readyState > 2){ markPlaying(); }
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(entry=>{
+      if(entry.isIntersecting){
+        const p = vid.play();
+        if(p && typeof p.catch === 'function'){
+          p.catch(()=>{ /* 자동재생이 막히면 화면을 탭할 때 재생됩니다 */ });
+        }
+      }
+    });
+  }, {threshold:0.2});
+  io.observe(vid);
 })();
 
 /* ---------- date/time picker: 날짜·시간 선택 모달 ---------- */
@@ -907,13 +1003,26 @@ leadForm.addEventListener('submit', async function(e){
   document.getElementById('successBox').style.display = 'block';
 });
 
+/* ---------- 카카오톡 링크 ----------
+   관리자 모드에서 링크를 등록하기 전까지는 클릭해도 이동하지 않고
+   안내만 띄웁니다. */
+function guardKakaoLink(el){
+  const href = el.getAttribute('href');
+  if(!href || href === '#'){
+    alert('아직 카카오톡 링크가 등록되지 않았습니다. 관리자 모드 > 홈페이지 문구 관리 > 푸터에서 등록해주세요.');
+    return false;
+  }
+  return true;
+}
+
 /* ---------- admin ---------- */
 function openAdminGate(){
   document.getElementById('adminOverlay').style.display = 'flex';
 }
-function checkAdminPw(){
+async function checkAdminPw(){
   const val = document.getElementById('adminPw').value;
-  if(val === ADMIN_PASSWORD){
+  const hash = await sha256Hex(val);
+  if(hash === ADMIN_PASSWORD_HASH){
     document.getElementById('adminOverlay').style.display = 'none';
     document.getElementById('adminPanel').style.display = 'block';
     switchAdminTab('leads');
@@ -933,21 +1042,203 @@ function switchAdminTab(tab){
   document.getElementById('settingsActions').style.display = isLeads ? 'none' : 'flex';
   document.getElementById('adminPanelTitle').textContent = isLeads ? '사주풀이 신청 내역' : '홈페이지 문구 관리';
 }
-async function loadSiteSettingsForm(){
-  const ta = document.getElementById('settingBizInfo');
-  try{
-    const settings = await window.__siteSettings.get();
-    ta.value = settings.bizInfo || document.getElementById('footBizInfo').textContent;
-  }catch(err){
-    console.error('설정 불러오기 실패:', err);
+/* ---------- 홈페이지 문구 전체 관리 ----------
+   페이지에 보이는 문구들을 섹션별로 묶어 관리자 화면에서 한 번에
+   수정할 수 있도록 합니다. 각 항목은 실제 화면 요소의 id를 가리키며,
+   저장하면 Firestore(settings/site)에 저장되고 화면에도 바로 반영됩니다. */
+function escapeHTML(str){
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+const TEXT_FIELDS = [
+  { group:'상단 메뉴', fields:[
+    { key:'navCtaBtn', id:'navCtaBtn', label:'상단 우측 버튼 문구' }
+  ]},
+  { group:'메인 화면 (히어로)', fields:[
+    { key:'heroEyebrow', id:'heroEyebrow', label:'상단 작은 라벨' },
+    { key:'heroTitle', id:'heroTitle', label:'메인 제목 (Enter로 줄바꿈, 마지막 줄은 금색으로 강조됩니다)', hasBr:true, accentLastLine:true, rows:3 },
+    { key:'heroSub', id:'heroSub', label:'제목 아래 설명 문구', rows:2 },
+    { key:'heroBtn', id:'heroBtn', label:'신청 버튼 문구' },
+    { key:'heroNote', id:'heroNote', label:'버튼 아래 작은 안내 문구' },
+    { key:'chartLabel', id:'chartLabel', label:'사주 예시 상단 라벨' },
+    { key:'chartCaption', id:'chartCaption', label:'사주 예시 하단 설명' }
+  ]},
+  { group:'재회운 특화 상담', fields:[
+    { key:'reunionEyebrow', id:'reunionEyebrow', label:'상단 라벨' },
+    { key:'reunionTitle', id:'reunionTitle', label:'제목 (Enter로 줄바꿈)', hasBr:true, rows:2 },
+    { key:'reunionDesc', id:'reunionDesc', label:'설명 문구', rows:3 },
+    { key:'reunionP1Title', id:'reunionP1Title', label:'포인트 01 제목' },
+    { key:'reunionP1Desc', id:'reunionP1Desc', label:'포인트 01 설명', rows:2 },
+    { key:'reunionP2Title', id:'reunionP2Title', label:'포인트 02 제목' },
+    { key:'reunionP2Desc', id:'reunionP2Desc', label:'포인트 02 설명', rows:2 },
+    { key:'reunionP3Title', id:'reunionP3Title', label:'포인트 03 제목' },
+    { key:'reunionP3Desc', id:'reunionP3Desc', label:'포인트 03 설명', rows:2 },
+    { key:'reunionNote', id:'reunionNote', label:'하단 안내 문구', rows:2 }
+  ]},
+  { group:'왜 사주를 봐야 할까요', fields:[
+    { key:'reasonsTitle', id:'reasonsTitle', label:'섹션 제목' },
+    { key:'reasonsDesc', id:'reasonsDesc', label:'섹션 설명' },
+    { key:'reason1Title', id:'reason1Title', label:'카드 1 제목' },
+    { key:'reason1Desc', id:'reason1Desc', label:'카드 1 설명', rows:2 },
+    { key:'reason2Title', id:'reason2Title', label:'카드 2 제목' },
+    { key:'reason2Desc', id:'reason2Desc', label:'카드 2 설명', rows:2 },
+    { key:'reason3Title', id:'reason3Title', label:'카드 3 제목' },
+    { key:'reason3Desc', id:'reason3Desc', label:'카드 3 설명', rows:2 }
+  ]},
+  { group:'신청부터 상담까지', fields:[
+    { key:'processEyebrow', id:'processEyebrow', label:'상단 라벨' },
+    { key:'processTitle', id:'processTitle', label:'섹션 제목' },
+    { key:'step1Title', id:'step1Title', label:'단계 1 제목' },
+    { key:'step1Desc', id:'step1Desc', label:'단계 1 설명', rows:2 },
+    { key:'step2Title', id:'step2Title', label:'단계 2 제목' },
+    { key:'step2Desc', id:'step2Desc', label:'단계 2 설명', rows:2 },
+    { key:'step3Title', id:'step3Title', label:'단계 3 제목' },
+    { key:'step3Desc', id:'step3Desc', label:'단계 3 설명', rows:2 }
+  ]},
+  { group:'신청서 영역', fields:[
+    { key:'formEyebrow', id:'formEyebrow', label:'상단 라벨' },
+    { key:'formTitle', id:'formTitle', label:'섹션 제목' },
+    { key:'formDesc', id:'formDesc', label:'섹션 설명' },
+    { key:'agreeText', id:'agreeText', label:'개인정보 수집·이용 동의 문구', rows:3 },
+    { key:'submitBtn', id:'submitBtn', label:'제출 버튼 문구' },
+    { key:'formFootNote', id:'formFootNote', label:'제출 버튼 아래 안내 문구' }
+  ]},
+  { group:'신청 완료 안내', fields:[
+    { key:'successTitle', id:'successTitle', label:'완료 제목' },
+    { key:'successDesc', id:'successDesc', label:'완료 설명 (Enter로 줄바꿈)', hasBr:true, rows:2 }
+  ]},
+  { group:'푸터', fields:[
+    { key:'footerNotice', id:'footerNotice', label:'상단 안내 문구' },
+    { key:'footBizInfo', id:'footBizInfo', label:'사업자 정보 문구', rows:3 },
+    { key:'kakaoLink', type:'url', targets:['footKakaoLink','kakaoFloatBtn'], label:'카카오톡 링크 (채널/오픈채팅 URL, 우측 하단 버튼과 푸터 링크에 함께 적용됩니다)' }
+  ]}
+];
+
+function getFieldCurrentText(field){
+  if(field.type === 'url'){
+    const el = document.getElementById(field.targets[0]);
+    const href = el ? el.getAttribute('href') : '';
+    return (!href || href === '#') ? '' : href;
+  }
+  const el = document.getElementById(field.id);
+  if(!el) return '';
+  if(field.hasBr) return el.innerText.trim();
+  return (el.tagName === 'INPUT' ? el.value : el.textContent).trim();
+}
+
+function setFieldText(field, value){
+  if(field.type === 'url'){
+    field.targets.forEach(id=>{
+      const el = document.getElementById(id);
+      if(el) el.setAttribute('href', value);
+    });
+    return;
+  }
+  const el = document.getElementById(field.id);
+  if(!el) return;
+  if(field.hasBr){
+    const lines = value.split('\n');
+    if(field.accentLastLine){
+      const last = lines.pop();
+      const head = lines.map(escapeHTML).join('<br>');
+      el.innerHTML = (head ? head + '<br>' : '') + '<span class="accent">' + escapeHTML(last) + '</span>';
+    } else {
+      el.innerHTML = lines.map(escapeHTML).join('<br>');
+    }
+  } else if(el.tagName === 'INPUT'){
+    el.value = value;
+  } else {
+    el.textContent = value;
   }
 }
-async function saveSiteSettings(){
-  const val = document.getElementById('settingBizInfo').value.trim();
-  if(!val){ alert('내용을 입력해주세요'); return; }
+
+/* 예전 버전에서는 사업자 정보 문구를 bizInfo 라는 키로 저장했습니다.
+   이미 저장해두신 내용이 있다면 새 구조(footBizInfo)에서도 이어서 보이도록 합니다. */
+function normalizeLegacySettings(settings){
+  settings = settings || {};
+  if((settings.footBizInfo == null || settings.footBizInfo === '') && settings.bizInfo){
+    settings.footBizInfo = settings.bizInfo;
+  }
+  return settings;
+}
+
+function applySiteSettings(settings){
+  if(!settings) return;
+  settings = normalizeLegacySettings(settings);
+  TEXT_FIELDS.forEach(grp=>{
+    grp.fields.forEach(field=>{
+      if(settings[field.key] != null && settings[field.key] !== ''){
+        setFieldText(field, settings[field.key]);
+      }
+    });
+  });
+}
+
+function renderSettingsForm(currentSettings){
+  currentSettings = normalizeLegacySettings(currentSettings);
+  const wrap = document.getElementById('settingsFieldsWrap');
+  if(!wrap) return;
+  wrap.innerHTML = '';
+  TEXT_FIELDS.forEach((grp, gi)=>{
+    const details = document.createElement('details');
+    details.className = 'settings-group';
+    if(gi === 0) details.open = true;
+    const summary = document.createElement('summary');
+    summary.textContent = grp.group;
+    details.appendChild(summary);
+    const body = document.createElement('div');
+    body.className = 'settings-body';
+    grp.fields.forEach(field=>{
+      const fieldWrap = document.createElement('div');
+      fieldWrap.className = 'settings-field';
+      const label = document.createElement('label');
+      label.setAttribute('for', 'setting-'+field.key);
+      label.textContent = field.label;
+      fieldWrap.appendChild(label);
+      const value = (currentSettings[field.key] != null) ? currentSettings[field.key] : getFieldCurrentText(field);
+      let input;
+      if(field.rows){
+        input = document.createElement('textarea');
+        input.rows = field.rows;
+      } else {
+        input = document.createElement('input');
+        input.type = 'text';
+      }
+      input.id = 'setting-'+field.key;
+      input.value = value;
+      fieldWrap.appendChild(input);
+      body.appendChild(fieldWrap);
+    });
+    details.appendChild(body);
+    wrap.appendChild(details);
+  });
+}
+
+async function loadSiteSettingsForm(){
+  const wrap = document.getElementById('settingsFieldsWrap');
+  if(wrap) wrap.innerHTML = '<div class="empty-state">불러오는 중...</div>';
   try{
-    await window.__siteSettings.save({ bizInfo: val });
-    document.getElementById('footBizInfo').textContent = val;
+    const settings = await window.__siteSettings.get();
+    renderSettingsForm(settings);
+  }catch(err){
+    console.error('설정 불러오기 실패:', err);
+    renderSettingsForm({});
+  }
+}
+
+async function saveSiteSettings(){
+  const data = {};
+  TEXT_FIELDS.forEach(grp=>{
+    grp.fields.forEach(field=>{
+      const input = document.getElementById('setting-'+field.key);
+      if(input) data[field.key] = input.value;
+    });
+  });
+  try{
+    await window.__siteSettings.save(data);
+    applySiteSettings(data);
     alert('저장되었습니다');
   }catch(err){
     console.error('설정 저장 실패:', err);
@@ -1052,13 +1343,11 @@ function checkHash(){
 window.addEventListener('hashchange', checkHash);
 checkHash();
 
-/* ---------- 방문자 화면에 저장된 사업자 정보 문구 반영 ---------- */
+/* ---------- 방문자 화면에 저장된 홈페이지 문구 전체 반영 ---------- */
 window.addEventListener('DOMContentLoaded', async ()=>{
   try{
     const settings = await window.__siteSettings.get();
-    if(settings.bizInfo){
-      document.getElementById('footBizInfo').textContent = settings.bizInfo;
-    }
+    applySiteSettings(settings);
   }catch(err){
     console.error('사이트 설정 불러오기 실패:', err);
   }
