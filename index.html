@@ -345,6 +345,12 @@
   }
   .admin-header{max-width:1000px;margin:0 auto 24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;}
   .admin-header h2{font-family:'Gowun Batang',serif;color:var(--gold-soft);margin:0;}
+  .admin-tabs{display:flex;gap:8px;}
+  .admin-tab{
+    background:transparent;border:1px solid var(--line);color:var(--parchment-dim);
+    padding:9px 18px;border-radius:999px;font-size:13px;cursor:pointer;
+  }
+  .admin-tab.active{background:var(--gold);color:#1a1408;border-color:var(--gold);font-weight:700;}
   .admin-actions button{
     background:var(--midnight);border:1px solid var(--line);color:var(--parchment);
     padding:9px 16px;border-radius:8px;font-size:13px;cursor:pointer;margin-left:8px;
@@ -594,15 +600,26 @@
 <!-- ===== Admin: panel ===== -->
 <div id="adminPanel">
   <div class="admin-header">
-    <h2>사주풀이 신청 내역</h2>
-    <div class="admin-actions">
+    <h2 id="adminPanelTitle">사주풀이 신청 내역</h2>
+    <div class="admin-tabs">
+      <button type="button" class="admin-tab active" id="tabLeadsBtn" onclick="switchAdminTab('leads')">신청 내역</button>
+      <button type="button" class="admin-tab" id="tabSettingsBtn" onclick="switchAdminTab('settings')">홈페이지 문구 관리</button>
+    </div>
+    <div class="admin-actions" id="leadsActions">
       <button onclick="exportCSV()">CSV 다운로드</button>
       <button class="danger" onclick="clearAll()">전체 삭제</button>
       <button onclick="closeAdmin()">닫기</button>
     </div>
+    <div class="admin-actions" id="settingsActions" style="display:none;">
+      <button onclick="closeAdmin()">닫기</button>
+    </div>
   </div>
 
-  <div class="wrap" style="margin-bottom:32px;">
+  <div id="adminTabLeads">
+    <div id="adminTableWrap" class="wrap"></div>
+  </div>
+
+  <div id="adminTabSettings" class="wrap" style="display:none;max-width:640px;">
     <div class="form-card" style="max-width:none;">
       <div class="field" style="margin-bottom:0;">
         <label for="settingBizInfo">푸터 사업자 정보 문구</label>
@@ -614,8 +631,6 @@
       </div>
     </div>
   </div>
-
-  <div id="adminTableWrap" class="wrap"></div>
 </div>
 
 <!-- ===== 날짜 선택 모달 ===== -->
@@ -900,11 +915,22 @@ function checkAdminPw(){
   if(val === ADMIN_PASSWORD){
     document.getElementById('adminOverlay').style.display = 'none';
     document.getElementById('adminPanel').style.display = 'block';
+    switchAdminTab('leads');
     renderAdminTable();
     loadSiteSettingsForm();
   } else {
     alert('비밀번호가 올바르지 않습니다');
   }
+}
+function switchAdminTab(tab){
+  const isLeads = tab === 'leads';
+  document.getElementById('tabLeadsBtn').classList.toggle('active', isLeads);
+  document.getElementById('tabSettingsBtn').classList.toggle('active', !isLeads);
+  document.getElementById('adminTabLeads').style.display = isLeads ? 'block' : 'none';
+  document.getElementById('adminTabSettings').style.display = isLeads ? 'none' : 'block';
+  document.getElementById('leadsActions').style.display = isLeads ? 'flex' : 'none';
+  document.getElementById('settingsActions').style.display = isLeads ? 'none' : 'flex';
+  document.getElementById('adminPanelTitle').textContent = isLeads ? '사주풀이 신청 내역' : '홈페이지 문구 관리';
 }
 async function loadSiteSettingsForm(){
   const ta = document.getElementById('settingBizInfo');
@@ -942,7 +968,8 @@ async function renderAdminTable(){
     leads = await getLeads();
   }catch(err){
     console.error('Firestore 조회 실패:', err);
-    wrap.innerHTML = '<div class="empty-state">목록을 불러오지 못했습니다. 새로고침 후 다시 시도해주세요.</div>';
+    const reason = (err && err.code) ? err.code : (err && err.message) || '알 수 없는 오류';
+    wrap.innerHTML = `<div class="empty-state">목록을 불러오지 못했습니다.<br>(${reason})<br>Firestore 콘솔에서 leads 컬렉션 읽기 권한을 확인해주세요.</div>`;
     return;
   }
   if(leads.length === 0){
