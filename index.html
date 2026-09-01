@@ -16,7 +16,7 @@
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
   import {
     getFirestore, collection, addDoc, getDocs, deleteDoc, doc,
-    query, orderBy, serverTimestamp, writeBatch
+    query, orderBy, serverTimestamp, writeBatch, getDoc, setDoc
   } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -56,6 +56,19 @@
       await batch.commit();
     }
   };
+
+  /* 사업자 정보 등 사이트 문구를 관리자 모드에서 바로 수정할 수 있도록
+     Firestore의 settings/site 문서에 저장합니다. */
+  const siteSettingsRef = doc(db, "settings", "site");
+  window.__siteSettings = {
+    async get(){
+      const snap = await getDoc(siteSettingsRef);
+      return snap.exists() ? snap.data() : {};
+    },
+    async save(data){
+      await setDoc(siteSettingsRef, data, { merge: true });
+    }
+  };
 </script>
 <style>
   :root{
@@ -79,6 +92,8 @@
     line-height:1.6;
     -webkit-font-smoothing:antialiased;
     overflow-x:hidden;
+    word-break:keep-all;
+    overflow-wrap:break-word;
   }
   a{color:inherit;}
   img,svg{display:block;max-width:100%;}
@@ -315,6 +330,7 @@
     .form-card{padding:32px 20px;}
     .interest-grid{grid-template-columns:repeat(2,1fr);}
     .reunion-points{grid-template-columns:1fr;}
+    .reunion-point{text-align:left;}
   }
 
   /* ---------- admin ---------- */
@@ -557,7 +573,7 @@
   <footer class="wrap">
     <div class="foot-logo">명운당 命運堂</div>
     <p>본 페이지는 상담 신청 접수를 위한 안내 페이지입니다.</p>
-    <p>상호 · 사업자등록번호 · 주소 등 실제 정보로 교체해주세요.</p>
+    <p id="footBizInfo">상호 · 사업자등록번호 · 주소 등 실제 정보로 교체해주세요.</p>
     <a href="#admin" class="admin-link">관리자</a>
   </footer>
 </main>
@@ -585,6 +601,20 @@
       <button onclick="closeAdmin()">닫기</button>
     </div>
   </div>
+
+  <div class="wrap" style="margin-bottom:32px;">
+    <div class="form-card" style="max-width:none;">
+      <div class="field" style="margin-bottom:0;">
+        <label for="settingBizInfo">푸터 사업자 정보 문구</label>
+        <textarea id="settingBizInfo" rows="3" placeholder="예: 상호 명운당 | 대표 홍길동 | 사업자등록번호 000-00-00000 | 주소 ..." style="width:100%;padding:13px 14px;border-radius:10px;border:1px solid var(--line);background:var(--ink);color:var(--parchment);font-size:14.5px;font-family:inherit;resize:vertical;"></textarea>
+        <div class="hint">페이지 맨 아래 사업자 정보 문구입니다. 저장하면 바로 반영됩니다.</div>
+      </div>
+      <div style="margin-top:14px;text-align:right;">
+        <button class="submit-btn" style="width:auto;padding:11px 24px;" onclick="saveSiteSettings()">저장</button>
+      </div>
+    </div>
+  </div>
+
   <div id="adminTableWrap" class="wrap"></div>
 </div>
 
@@ -871,8 +901,30 @@ function checkAdminPw(){
     document.getElementById('adminOverlay').style.display = 'none';
     document.getElementById('adminPanel').style.display = 'block';
     renderAdminTable();
+    loadSiteSettingsForm();
   } else {
     alert('비밀번호가 올바르지 않습니다');
+  }
+}
+async function loadSiteSettingsForm(){
+  const ta = document.getElementById('settingBizInfo');
+  try{
+    const settings = await window.__siteSettings.get();
+    ta.value = settings.bizInfo || document.getElementById('footBizInfo').textContent;
+  }catch(err){
+    console.error('설정 불러오기 실패:', err);
+  }
+}
+async function saveSiteSettings(){
+  const val = document.getElementById('settingBizInfo').value.trim();
+  if(!val){ alert('내용을 입력해주세요'); return; }
+  try{
+    await window.__siteSettings.save({ bizInfo: val });
+    document.getElementById('footBizInfo').textContent = val;
+    alert('저장되었습니다');
+  }catch(err){
+    console.error('설정 저장 실패:', err);
+    alert('저장 중 문제가 발생했습니다.');
   }
 }
 function closeAdmin(){
@@ -971,6 +1023,18 @@ function checkHash(){
 }
 window.addEventListener('hashchange', checkHash);
 checkHash();
+
+/* ---------- 방문자 화면에 저장된 사업자 정보 문구 반영 ---------- */
+window.addEventListener('DOMContentLoaded', async ()=>{
+  try{
+    const settings = await window.__siteSettings.get();
+    if(settings.bizInfo){
+      document.getElementById('footBizInfo').textContent = settings.bizInfo;
+    }
+  }catch(err){
+    console.error('사이트 설정 불러오기 실패:', err);
+  }
+});
 </script>
 
 </body>
