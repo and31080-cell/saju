@@ -3,715 +3,1370 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>결명당 | 사주단자 신청</title>
-<meta name="description" content="생년월일시만 남기면 전문 역술가가 사주를 풀어드립니다. 지금 사주단자를 신청하세요.">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="naver-site-verification" content="d893bab511dabf72d91c24bebd372513d37348d6" />
+<title>명운당 | 사주풀이 신청</title>
+<meta name="description" content="생년월일시 네 글자에 새겨진 당신의 운명, 명운당에서 풀이해드립니다.">
+<meta name="robots" content="index, follow">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta property="og:title" content="명운당 | 사주풀이 신청">
+<meta property="og:description" content="생년월일시 네 글자에 새겨진 당신의 운명, 명운당에서 풀이해드립니다.">
+<meta property="og:image" content="symbol_logo.png">
+<meta property="og:type" content="website">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;500;600;700;900&family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Song+Myung&family=Gowun+Batang:wght@400;700&family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<script type="module">
+  /* ---------- Firebase (Firestore) 연동 ---------- */
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
+  import {
+    getFirestore, collection, addDoc, getDocs, deleteDoc, doc,
+    query, orderBy, serverTimestamp, writeBatch, getDoc, setDoc
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAh-Hv2A3OnjD5kLia-EART7_Lty7f4i7Q",
+    authDomain: "saju82-241c7.firebaseapp.com",
+    projectId: "saju82-241c7",
+    storageBucket: "saju82-241c7.firebasestorage.app",
+    messagingSenderId: "623083236142",
+    appId: "1:623083236142:web:893d631257336bdb0568bf",
+    measurementId: "G-GJPLG4S7NK"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  try { getAnalytics(app); } catch(e){ /* analytics 차단 환경 등에서는 조용히 무시 */ }
+  const db = getFirestore(app);
+  const leadsCol = collection(db, "leads");
+
+  /* PC·모바일 어디서든 같은 신청 목록을 보고 관리할 수 있도록
+     신청서 저장/조회/삭제를 전부 Firestore로 처리합니다. */
+  window.__leadsDB = {
+    async addLead(lead){
+      const docRef = await addDoc(leadsCol, { ...lead, createdAt: serverTimestamp() });
+      return docRef.id;
+    },
+    async getLeads(){
+      const q = query(leadsCol, orderBy("createdAt", "desc"));
+      const snap = await getDocs(q);
+      return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    },
+    async deleteLead(id){
+      await deleteDoc(doc(db, "leads", id));
+    },
+    async clearAll(){
+      const snap = await getDocs(leadsCol);
+      const batch = writeBatch(db);
+      snap.docs.forEach(d => batch.delete(d.ref));
+      await batch.commit();
+    }
+  };
+
+  /* 사업자 정보 등 사이트 문구를 관리자 모드에서 바로 수정할 수 있도록
+     Firestore의 settings/site 문서에 저장합니다. */
+  const siteSettingsRef = doc(db, "settings", "site");
+  window.__siteSettings = {
+    async get(){
+      const snap = await getDoc(siteSettingsRef);
+      return snap.exists() ? snap.data() : {};
+    },
+    async save(data){
+      await setDoc(siteSettingsRef, data, { merge: true });
+    }
+  };
+</script>
 <style>
   :root{
-    --ink:#15120d;
-    --ink-soft:#211c15;
-    --ink-line:rgba(237,227,203,0.14);
-    --paper:#f2e9d6;
-    --paper-dim:#e6d9bb;
-    --paper-line:rgba(21,18,13,0.13);
-    --cinnabar:#a8371d;
-    --cinnabar-deep:#7c2814;
-    --gold:#c69a2e;
-    --gold-soft:#e0c46a;
-    --jade:#2c5f55;
-    --ivory:#ede3cb;
-    --ink-text:#211c15;
-    --font-display:'Noto Serif KR', serif;
-    --font-body:'Noto Sans KR', sans-serif;
-    --maxw:1120px;
+    --ink:#11121f;
+    --midnight:#1a1d33;
+    --midnight-2:#22273f;
+    --gold:#c9a24b;
+    --gold-soft:#e2c785;
+    --vermillion:#b7402f;
+    --parchment:#efe6d3;
+    --parchment-dim:#b9b3a0;
+    --line: rgba(201,162,75,0.25);
   }
   *{box-sizing:border-box;}
   html{scroll-behavior:smooth;}
   body{
     margin:0;
-    background:var(--paper);
-    color:var(--ink-text);
-    font-family:var(--font-body);
+    background:var(--ink);
+    color:var(--parchment);
+    font-family:'Noto Sans KR', sans-serif;
     line-height:1.6;
     -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+    word-break:keep-all;
+    overflow-wrap:break-word;
   }
-  h1,h2,h3{font-family:var(--font-display); margin:0; color:inherit;}
-  p{margin:0;}
-  a{color:inherit; text-decoration:none;}
-  ul{margin:0; padding:0; list-style:none;}
-  button, input, select, textarea{font-family:inherit; font-size:1rem;}
+  a{color:inherit;}
+  img,svg{display:block;max-width:100%;}
+
+  /* ---------- ambient stars ---------- */
+  .sky{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;}
+  .star{position:absolute;background:var(--gold-soft);border-radius:50%;opacity:.5;animation:twinkle 4s ease-in-out infinite;}
+  @keyframes twinkle{0%,100%{opacity:.15;}50%{opacity:.75;}}
+
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px;position:relative;z-index:1;}
+  section.wrap{padding:88px 24px;}
+
+  /* ---------- nav ---------- */
+  header.nav{
+    position:sticky;top:0;z-index:50;
+    background:rgba(17,18,31,0.82);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+  }
+  .nav-inner{max-width:1080px;margin:0 auto;padding:16px 24px;display:flex;align-items:center;justify-content:space-between;}
+  .logo{font-family:'Gowun Batang', serif;font-size:22px;letter-spacing:2px;color:var(--gold-soft);}
+  .logo small{display:block;font-size:10px;letter-spacing:4px;color:var(--parchment-dim);font-family:'Noto Sans KR',sans-serif;margin-top:2px;}
+  .nav-cta{
+    font-size:13px;font-weight:700;padding:10px 18px;border-radius:999px;
+    background:var(--gold);color:#1a1408;border:none;cursor:pointer;
+    letter-spacing:.5px;
+  }
+
+  /* ---------- hero ---------- */
+  .hero{padding:88px 0 60px;text-align:center;position:relative;}
   .eyebrow{
-    font-size:0.8rem; letter-spacing:0.18em; font-weight:600;
-    color:var(--cinnabar); text-transform:uppercase; margin-bottom:0.6rem; display:block;
+    display:inline-block;font-size:12px;letter-spacing:3px;color:var(--gold-soft);
+    border:1px solid var(--line);padding:6px 16px;border-radius:999px;margin-bottom:28px;
   }
-  section{padding: clamp(3.5rem,7vw,6.5rem) 1.4rem;}
-  .grain{position:relative;}
-  .grain::after{
-    content:""; position:absolute; inset:0; pointer-events:none; opacity:0.05; mix-blend-mode:overlay;
-    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
-  }
-  .btn{
-    display:inline-flex; align-items:center; justify-content:center; gap:0.4rem;
-    padding:0.85rem 1.6rem; border-radius:3px; border:1px solid transparent;
-    font-weight:600; font-size:0.98rem; cursor:pointer; transition:transform .15s ease, background .2s ease, box-shadow .2s ease;
-  }
-  .btn:active{transform:translateY(1px);}
-  .btn-primary{background:var(--cinnabar); color:var(--ivory);}
-  .btn-primary:hover{background:var(--cinnabar-deep);}
-  .btn-secondary{background:transparent; border-color:var(--ink-text); color:var(--ink-text);}
-  .btn-secondary:hover{background:var(--ink-text); color:var(--paper);}
-  .btn-ghost{background:transparent; color:inherit; border-color:var(--ink-line);}
-  .btn-danger{background:transparent; color:var(--cinnabar); border-color:var(--cinnabar);}
-  .btn-cta{background:var(--gold); color:var(--ink);}
-  .btn-cta:hover{background:var(--gold-soft);}
-  :focus-visible{outline:2px solid var(--cinnabar); outline-offset:2px;}
-
-  /* NAV */
-  .nav{
-    position:sticky; top:0; z-index:40;
-    background:rgba(21,18,13,0.94); backdrop-filter:blur(6px);
-    border-bottom:1px solid var(--ink-line);
-  }
-  .nav-inner{
-    max-width:var(--maxw); margin:0 auto; padding:0.85rem 1.4rem;
-    display:flex; align-items:center; justify-content:space-between; gap:1rem;
-  }
-  .brand{display:flex; align-items:center; gap:0.55rem; font-family:var(--font-display); font-weight:700; font-size:1.15rem; color:var(--ivory);}
-  .brand-seal{
-    width:1.7rem; height:1.7rem; border-radius:3px; background:var(--cinnabar); color:var(--ivory);
-    display:inline-flex; align-items:center; justify-content:center; font-size:1rem; font-weight:700;
-  }
-  .nav-links{display:flex; gap:1.4rem; font-size:0.92rem; color:var(--ivory);}
-  .nav-links a{opacity:0.82;}
-  .nav-links a:hover{opacity:1;}
-  @media (max-width:720px){ .nav-links{display:none;} }
-
-  /* HERO */
-  .hero{
-    position:relative; background:radial-gradient(120% 90% at 50% -10%, #241f18 0%, var(--ink) 55%, #0f0d0a 100%);
-    color:var(--ivory); text-align:center; padding-top:clamp(4rem,10vw,7rem); padding-bottom:clamp(3rem,8vw,5rem);
-    overflow:hidden;
-  }
-  .hero-inner{max-width:760px; margin:0 auto; position:relative; z-index:2;}
-  .hero h1{
-    font-size:clamp(1.9rem,4.6vw,3.1rem); font-weight:700; line-height:1.35; letter-spacing:-0.01em;
-    margin-bottom:1.1rem;
-  }
-  .hero-sub{font-size:clamp(0.98rem,1.6vw,1.1rem); color:var(--paper-dim); margin-bottom:2rem;}
-  .hero-cta{display:flex; flex-direction:column; align-items:center; gap:0.6rem; margin-bottom:3.2rem;}
-  .hero-note{font-size:0.82rem; color:rgba(237,227,203,0.6);}
-  .hero-cta .btn-primary{padding:1rem 2.2rem; font-size:1.02rem; box-shadow:0 8px 24px rgba(168,55,29,0.35);}
-
-  .pillars{
-    display:flex; justify-content:center; gap:clamp(0.6rem,2vw,1.3rem); margin:0 auto 1rem;
-    max-width:640px; overflow-x:auto; padding:0.5rem 0.2rem;
-  }
-  .pillar{
-    flex:0 0 auto; width:clamp(64px,16vw,86px);
-    background:linear-gradient(180deg,#3c3325,#262016);
-    border:1px solid rgba(198,154,46,0.35);
-    border-radius:10px 10px 4px 4px;
-    padding:0.9rem 0.4rem 0.7rem;
-    display:flex; flex-direction:column; align-items:center; gap:0.55rem;
-    opacity:0; transform:translateY(14px);
-    animation:riseIn .7s ease forwards; animation-delay:var(--d,0s);
-  }
-  .pillar-label{font-size:0.72rem; letter-spacing:0.08em; color:var(--gold-soft); font-weight:600;}
-  .pillar-hanja{
-    writing-mode:vertical-rl; text-orientation:upright;
-    font-family:var(--font-display); font-size:1.5rem; font-weight:600; color:var(--ivory);
-    letter-spacing:0.15em;
-  }
-  .pillar-mark{width:8px; height:8px; background:var(--cinnabar); border-radius:1px;}
-  @keyframes riseIn{ to{opacity:1; transform:translateY(0);} }
-  .pillars-caption{font-size:0.82rem; color:rgba(237,227,203,0.55); margin-top:0.4rem;}
-  @media (prefers-reduced-motion:reduce){ .pillar{animation:none; opacity:1; transform:none;} }
-
-  /* MOMENTS */
-  .moments{max-width:var(--maxw); margin:0 auto; text-align:center;}
-  .moments h2{font-size:clamp(1.4rem,2.6vw,1.9rem); margin-bottom:2.4rem;}
-  .moment-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:1.1rem; text-align:left;}
-  @media (max-width:900px){ .moment-grid{grid-template-columns:repeat(2,1fr);} }
-  @media (max-width:520px){ .moment-grid{grid-template-columns:1fr;} }
-  .moment-card{
-    background:#fff; border:1px solid var(--paper-line); border-radius:6px; padding:1.5rem 1.3rem;
-  }
-  .moment-icon{
-    display:inline-flex; align-items:center; justify-content:center; width:2.4rem; height:2.4rem;
-    border-radius:50%; background:var(--ink); color:var(--gold-soft); font-family:var(--font-display);
-    font-size:1.1rem; margin-bottom:0.9rem;
-  }
-  .moment-card h3{font-size:1.05rem; margin-bottom:0.5rem;}
-  .moment-card p{font-size:0.9rem; color:#4b453a;}
-
-  /* EXPERT */
-  .expert{background:var(--paper-dim);}
-  .expert-inner{
-    max-width:var(--maxw); margin:0 auto; display:grid; grid-template-columns:220px 1fr; gap:2.6rem; align-items:center;
-  }
-  @media (max-width:720px){ .expert-inner{grid-template-columns:1fr; text-align:center;} }
-  .expert-photo{
-    width:200px; height:200px; border-radius:50%; margin:0 auto;
-    background:radial-gradient(circle at 35% 30%, #4a4032, var(--ink) 72%);
-    border:3px solid var(--gold); position:relative; display:flex; align-items:center; justify-content:center;
-  }
-  .expert-photo span{font-family:var(--font-display); color:var(--ivory); font-size:2.6rem;}
-  .expert h2{font-size:clamp(1.3rem,2.4vw,1.7rem); margin-bottom:0.9rem;}
-  .expert-text p{color:#3c362b; max-width:52ch;}
-  @media (max-width:720px){ .expert-text p{margin:0 auto;} }
-  .expert-stats{display:flex; gap:2rem; margin-top:1.6rem; flex-wrap:wrap;}
-  @media (max-width:720px){ .expert-stats{justify-content:center;} }
-  .expert-stats li{display:flex; flex-direction:column;}
-  .expert-stats strong{font-family:var(--font-display); font-size:1.3rem; color:var(--cinnabar);}
-  .expert-stats span{font-size:0.8rem; color:#5a5346;}
-
-  /* REVIEWS */
-  .reviews{max-width:var(--maxw); margin:0 auto; text-align:center;}
-  .reviews h2{font-size:clamp(1.4rem,2.6vw,1.9rem); margin-bottom:2.4rem;}
-  .review-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:1.2rem; text-align:left;}
-  @media (max-width:820px){ .review-grid{grid-template-columns:1fr;} }
-  .review-card{
-    position:relative; background:#fff; border:1px solid var(--paper-line); border-radius:4px;
-    padding:1.6rem 1.4rem 1.3rem; box-shadow:2px 3px 0 rgba(21,18,13,0.05);
-  }
-  .review-stamp{
-    position:absolute; top:-14px; right:16px; width:32px; height:32px; border-radius:4px;
-    background:var(--cinnabar); color:var(--ivory); font-family:var(--font-display);
-    display:flex; align-items:center; justify-content:center; font-size:1rem; transform:rotate(-6deg);
-    box-shadow:0 2px 5px rgba(0,0,0,0.25);
-  }
-  .review-card p{font-size:0.95rem; color:#3c362b; margin-bottom:1rem;}
-  .review-name{font-size:0.8rem; color:#8a8272;}
-
-  /* APPLY / FORM */
-  .apply{background:var(--ink); color:var(--ivory);}
-  .apply-inner{max-width:640px; margin:0 auto;}
-  .apply h2{font-size:clamp(1.4rem,2.6vw,1.9rem); margin-bottom:0.8rem;}
-  .apply-sub{color:rgba(237,227,203,0.72); font-size:0.94rem; margin-bottom:2.2rem;}
-  .lead-form{
-    background:var(--paper); color:var(--ink-text); border-radius:8px; padding:clamp(1.4rem,3vw,2.2rem);
-    border:1px solid rgba(198,154,46,0.4);
-  }
-  .form-row{display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1.1rem;}
-  @media (max-width:560px){ .form-row{grid-template-columns:1fr;} }
-  .lead-form label{display:flex; flex-direction:column; gap:0.4rem; font-size:0.86rem; font-weight:600; color:#443f33;}
-  .field-head{display:flex; align-items:center; gap:0.9rem; flex-wrap:wrap;}
-  .lead-form input[type=text], .lead-form input[type=tel], .lead-form input[type=email], .lead-form input[type=date],
-  .lead-form select, .lead-form textarea{
-    border:1px solid var(--paper-line); border-radius:4px; padding:0.65rem 0.7rem; background:#fffdf8; color:var(--ink-text);
+  h1{
+    font-family:'Song Myung', serif;
     font-weight:400;
+    font-size:clamp(30px, 5vw, 52px);
+    line-height:1.35;
+    margin:0 0 20px;
+    color:var(--parchment);
   }
-  .lead-form textarea{resize:vertical;}
-  .radio-group{display:flex; gap:1rem; flex-wrap:wrap; font-weight:400; font-size:0.9rem;}
-  .radio-group label{flex-direction:row; align-items:center; gap:0.35rem; font-weight:400;}
-  .agree{
-    display:flex; flex-direction:row; align-items:flex-start; gap:0.5rem; font-size:0.8rem;
-    color:#5a5346; font-weight:400; margin:1.2rem 0 1.4rem;
+  h1 .accent{color:var(--gold-soft);}
+  .hero-sub{
+    max-width:520px;margin:0 auto 40px;color:var(--parchment-dim);font-size:16px;
   }
-  .agree input{margin-top:0.2rem;}
-  .btn-submit{width:100%; padding:1rem;}
+  .btn-primary{
+    display:inline-block;
+    background:linear-gradient(135deg, var(--gold-soft), var(--gold));
+    color:#1a1408;font-weight:700;font-size:16px;
+    padding:16px 38px;border-radius:999px;border:none;cursor:pointer;
+    text-decoration:none;letter-spacing:.3px;
+    box-shadow:0 10px 30px -10px rgba(201,162,75,0.55);
+    transition:transform .2s ease;
+  }
+  .btn-primary:hover{transform:translateY(-2px);}
+  .hero-note{margin-top:16px;font-size:12.5px;color:var(--parchment-dim);}
 
-  /* FAQ */
-  .faq{max-width:760px; margin:0 auto;}
-  .faq h2{font-size:clamp(1.4rem,2.6vw,1.9rem); margin-bottom:1.6rem; text-align:center;}
-  .faq-list details{
-    border-bottom:1px solid var(--paper-line); padding:1rem 0.2rem;
+  /* ---------- four pillars signature chart ---------- */
+  .chart-wrap{margin:64px auto 0;max-width:640px;}
+  .chart-label{font-size:12px;letter-spacing:2px;color:var(--parchment-dim);margin-bottom:14px;}
+  .pillars{
+    display:grid;grid-template-columns:repeat(4,1fr);
+    border:1px solid var(--line);border-radius:16px;overflow:hidden;
+    background:linear-gradient(180deg, var(--midnight), var(--midnight-2));
   }
-  .faq-list summary{cursor:pointer; font-weight:600; list-style:none; position:relative; padding-right:1.6rem;}
-  .faq-list summary::-webkit-details-marker{display:none;}
-  .faq-list summary::after{content:"+"; position:absolute; right:0; top:0; font-size:1.2rem; color:var(--cinnabar);}
-  .faq-list details[open] summary::after{content:"–";}
-  .faq-list p{margin-top:0.7rem; font-size:0.9rem; color:#4b453a;}
+  .pillar{padding:20px 6px 22px;text-align:center;border-right:1px solid var(--line);opacity:0;transform:translateY(14px);transition:opacity .7s ease, transform .7s ease;}
+  .pillar:last-child{border-right:none;}
+  .pillar.show{opacity:1;transform:translateY(0);}
+  .pillar .name{font-size:11px;letter-spacing:2px;color:var(--gold-soft);margin-bottom:14px;}
+  .pillar .hanja{
+    font-family:'Gowun Batang', serif;font-size:34px;color:var(--parchment);
+    padding:10px 0;border-bottom:1px dashed var(--line);margin-bottom:10px;
+  }
+  .pillar .hanja.jiji{border-bottom:none;margin-bottom:0;padding-bottom:0;}
+  .chart-caption{margin-top:14px;font-size:12px;color:var(--parchment-dim);text-align:center;}
 
-  /* FOOTER */
-  .site-footer{
-    background:var(--ink-soft); color:rgba(237,227,203,0.65); text-align:center;
-    padding:2.4rem 1.4rem 1.6rem; font-size:0.82rem;
-  }
-  .site-footer p{margin-bottom:0.4rem;}
-  .footer-fine{font-size:0.75rem; color:rgba(237,227,203,0.4);}
-  .admin-link{
-    margin-top:1rem; background:none; border:none; color:rgba(237,227,203,0.35); font-size:0.72rem; cursor:pointer;
-  }
-  .admin-link:hover{color:rgba(237,227,203,0.6);}
+  /* ---------- sections ---------- */
+  section{padding:88px 0;position:relative;}
+  .section-head{text-align:center;max-width:560px;margin:0 auto 52px;}
+  .section-eyebrow{font-size:12px;letter-spacing:3px;color:var(--gold-soft);margin-bottom:12px;}
+  .section-title{font-family:'Gowun Batang', serif;font-size:clamp(24px,3.2vw,32px);margin:0 0 22px;color:var(--parchment);}
+  .section-desc{color:var(--parchment-dim);font-size:15px;}
 
-  /* MODALS */
-  .modal-overlay{
-    position:fixed; inset:0; background:rgba(15,13,10,0.6); display:flex; align-items:center; justify-content:center;
-    padding:1.2rem; z-index:100;
+  /* ---------- reunion (재회운) ---------- */
+  .reunion-section{
+    background:radial-gradient(ellipse at 50% 0%, rgba(183,64,47,0.14), transparent 60%);
+    border-top:1px solid var(--line);border-bottom:1px solid var(--line);
   }
-  .modal-overlay.hidden{display:none;}
-  .modal{
-    background:var(--paper); border-radius:8px; padding:1.8rem; max-width:380px; width:100%;
-    text-align:center; box-shadow:0 20px 60px rgba(0,0,0,0.35);
+  .reunion-glyph{
+    width:64px;height:64px;margin:0 auto 20px;border:1px solid var(--vermillion);border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Gowun Batang',serif;font-size:26px;color:#e8a89e;
   }
-  .modal h3{font-size:1.15rem; margin-bottom:0.9rem;}
-  .modal p{font-size:0.9rem; color:#4b453a; margin-bottom:1.2rem;}
-  .modal input[type=password]{
-    width:100%; padding:0.7rem 0.8rem; border:1px solid var(--paper-line); border-radius:4px; margin-bottom:1rem;
+  .reunion-points{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;max-width:840px;margin:0 auto 36px;}
+  .reunion-point{
+    background:var(--midnight);border:1px solid rgba(183,64,47,0.35);border-radius:16px;padding:26px 20px;text-align:center;
+    opacity:0;transform:translateY(16px);transition:opacity .6s ease, transform .6s ease;
   }
-  .modal-actions{display:flex; gap:0.6rem; justify-content:center; margin-bottom:0.4rem;}
-  .modal-wide{max-width:960px; text-align:left;}
-  .modal-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem;}
-  .modal-wide .modal-actions{justify-content:flex-start; margin-bottom:1rem;}
-  /* CHARACTER VIDEO */
-  .character-video{max-width:var(--maxw); margin:0 auto; text-align:center;}
-  .character-video-inner{position:relative; border-radius:10px; overflow:hidden; background:#000; box-shadow:0 14px 34px rgba(21,18,13,0.16);}
-  .character-video-inner video{width:100%; display:block; aspect-ratio:16/9; object-fit:cover;}
-  .video-placeholder{
-    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
-    color:rgba(237,227,203,0.65); font-size:0.9rem; padding:1rem; text-align:center;
-    background:linear-gradient(135deg,#2a241a,#141210);
+  .reunion-point.show{opacity:1;transform:translateY(0);}
+  .reunion-point .num{font-family:'Gowun Batang',serif;color:#e8a89e;font-size:13px;letter-spacing:2px;margin-bottom:10px;}
+  .reunion-point h3{margin:0 0 8px;font-size:15.5px;color:var(--parchment);}
+  .reunion-point p{margin:0;font-size:13px;color:var(--parchment-dim);}
+  .reunion-note{
+    max-width:520px;margin:0 auto;text-align:center;font-size:13.5px;color:var(--parchment-dim);
+    border-left:2px solid var(--vermillion);padding-left:16px;text-align:left;
+  }
+  .reunion-video{max-width:840px;margin:32px auto 0;}
+  .reunion-video video{
+    width:100%;display:block;background:#000;border-radius:18px;
+    border:1px solid rgba(183,64,47,0.4);
+    box-shadow:0 20px 50px -20px rgba(183,64,47,0.55);
+    opacity:0;transition:opacity .5s ease;
+  }
+  .reunion-video video.is-playing{opacity:1;}
+  /* 모바일(특히 iOS Safari)에서 자동재생 직전에 잠깐 노출되는
+     기본 재생 버튼 오버레이를 감춥니다 */
+  .reunion-video video::-webkit-media-controls,
+  .reunion-video video::-webkit-media-controls-start-playback-button,
+  .reunion-video video::-webkit-media-controls-panel{
+    display:none !important;-webkit-appearance:none;opacity:0 !important;
   }
 
-  /* RESULT MODAL EXTRAS */
-  .result-video-wrap{position:relative; border-radius:8px; overflow:hidden; background:#000; margin:1.2rem 0;}
-  .result-video-wrap video{width:100%; display:block; aspect-ratio:16/9; object-fit:cover;}
-  .kakao-link-btn{
-    display:flex; align-items:center; justify-content:center; gap:0.5rem;
-    background:#FEE500; color:#191919; font-weight:700; text-decoration:none;
-    padding:0.85rem 1.2rem; border-radius:8px; margin-bottom:1.2rem; font-size:0.95rem;
-    transition:transform .15s ease, box-shadow .2s ease;
+  .reasons{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
+  .reason-card{
+    background:var(--midnight);border:1px solid var(--line);border-radius:18px;padding:32px 24px;
+    opacity:0;transform:translateY(20px);transition:opacity .6s ease, transform .6s ease;
   }
-  .kakao-link-btn:hover{ box-shadow:0 6px 16px rgba(254,229,0,0.45); transform:translateY(-1px); }
+  .reason-card.show{opacity:1;transform:translateY(0);}
+  .reason-glyph{font-family:'Gowun Batang',serif;font-size:30px;color:var(--gold-soft);margin-bottom:16px;}
+  .reason-card h3{margin:0 0 10px;font-size:17px;color:var(--parchment);font-weight:700;}
+  .reason-card p{margin:0;font-size:14px;color:var(--parchment-dim);}
 
-  .deposit-box{
-    position:relative; padding:1.4rem; border-radius:10px; overflow:hidden;
-    background:linear-gradient(135deg, var(--ink), #2a2318); border:1px solid var(--gold);
+  .process{position:relative;}
+  .steps{max-width:640px;margin:0 auto;}
+  .step{
+    display:grid;grid-template-columns:56px 1fr;gap:22px;padding:26px 0;
+    border-bottom:1px solid var(--line);
+    opacity:0;transform:translateX(-14px);transition:opacity .6s ease, transform .6s ease;
   }
-  .deposit-box::before{
-    content:""; position:absolute; inset:0; pointer-events:none;
-    background:linear-gradient(120deg, transparent, rgba(198,154,46,0.45), transparent);
-    background-size:200% 100%; animation:shimmer 2.4s linear infinite;
+  .step.show{opacity:1;transform:translateX(0);}
+  .step:last-child{border-bottom:none;}
+  .step-num{
+    width:56px;height:56px;border-radius:50%;border:1px solid var(--gold);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Gowun Batang',serif;font-size:20px;color:var(--gold-soft);
   }
-  @keyframes shimmer{ 0%{background-position:200% 0;} 100%{background-position:-200% 0;} }
-  .deposit-label{position:relative; color:var(--gold-soft); font-size:0.8rem; letter-spacing:0.08em; margin-bottom:0.5rem;}
-  .deposit-account{
-    position:relative; display:flex; align-items:center; justify-content:center; gap:0.8rem; flex-wrap:wrap;
-    font-family:var(--font-display); font-size:clamp(1.1rem,4vw,1.5rem); font-weight:700; color:var(--ivory);
-    animation:pulseGlow 1.8s ease-in-out infinite;
-  }
-  @keyframes pulseGlow{
-    0%,100%{ text-shadow:0 0 0 rgba(224,196,106,0); }
-    50%{ text-shadow:0 0 16px rgba(224,196,106,0.55); }
-  }
-  .copy-btn{
-    background:var(--gold); color:var(--ink); border:none; border-radius:4px; padding:0.35rem 0.7rem;
-    font-size:0.75rem; font-weight:700; cursor:pointer;
-  }
-  @media (prefers-reduced-motion:reduce){ .deposit-box::before, .deposit-account{animation:none;} }
+  .step h3{margin:2px 0 6px;font-size:16px;color:var(--parchment);}
+  .step p{margin:0;font-size:14px;color:var(--parchment-dim);}
 
-  /* ADMIN SETTINGS */
-  .admin-settings{margin-bottom:1.2rem; padding-bottom:1.2rem; border-bottom:1px solid var(--paper-line);}
-  .admin-settings-title{font-size:0.9rem; font-weight:700; margin-bottom:0.7rem; color:#332e24;}
-  .admin-settings-label{display:flex; flex-direction:column; gap:0.35rem; font-size:0.82rem; font-weight:600; color:#443f33; margin-bottom:0.8rem;}
-  .admin-settings-label input{padding:0.55rem 0.65rem; border:1px solid var(--paper-line); border-radius:4px; font-weight:400; font-size:0.88rem;}
-  .lead-table-wrap{overflow-x:auto; max-height:52vh;}
-  .lead-table{width:100%; border-collapse:collapse; font-size:0.82rem;}
-  .lead-table th, .lead-table td{border-bottom:1px solid var(--paper-line); padding:0.5rem 0.6rem; text-align:left; white-space:nowrap;}
-  .lead-table th{color:#6b6455; font-weight:600;}
-  .row-del{color:var(--cinnabar); background:none; border:none; cursor:pointer; font-size:0.8rem;}
-  .success-seal{
-    display:inline-flex; align-items:center; justify-content:center; width:3rem; height:3rem; border-radius:50%;
-    background:var(--cinnabar); color:var(--ivory); font-family:var(--font-display); font-size:1.3rem; margin-bottom:1rem;
+  /* ---------- form ---------- */
+  .form-section{background:linear-gradient(180deg, transparent, rgba(183,64,47,0.06) 40%, transparent);}
+  .form-card{
+    max-width:560px;margin:0 auto;background:var(--midnight);
+    border:1px solid var(--line);border-radius:24px;padding:40px 32px;
   }
-  .empty-note{color:#8a8272; font-size:0.85rem; padding:1rem 0;}
+  .field{margin-bottom:22px;}
+  .field label{display:block;font-size:13px;color:var(--gold-soft);margin-bottom:8px;letter-spacing:.3px;}
+  .field .hint{font-size:11.5px;color:var(--parchment-dim);margin-top:6px;}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  input[type=text], input[type=email], select{
+    width:100%;padding:13px 14px;border-radius:10px;border:1px solid var(--line);
+    background:var(--ink);color:var(--parchment);font-size:14.5px;font-family:inherit;
+  }
+  input::placeholder{color:#665f4d;}
 
-  .reveal{opacity:0; transform:translateY(18px); transition:opacity .6s ease, transform .6s ease;}
-  .reveal.in{opacity:1; transform:none;}
+  /* ---------- date/time picker triggers ---------- */
+  .picker-trigger{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    padding:13px 14px;border-radius:10px;border:1px solid var(--line);
+    background:var(--ink);cursor:pointer;font-size:14.5px;color:var(--parchment);
+    user-select:none;
+  }
+  .picker-trigger:hover{border-color:var(--gold);}
+  .picker-trigger.disabled{opacity:.4;pointer-events:none;}
+  .picker-placeholder{color:#665f4d;}
+  .picker-icon{flex-shrink:0;opacity:.8;}
+
+  /* ---------- picker modals ---------- */
+  .picker-overlay{
+    position:fixed;inset:0;background:rgba(10,10,18,0.85);z-index:300;
+    display:none;align-items:center;justify-content:center;padding:20px;
+  }
+  .picker-box{background:var(--midnight);border:1px solid var(--line);border-radius:18px;padding:26px;max-width:320px;width:100%;}
+  .picker-title{font-family:'Gowun Batang',serif;color:var(--gold-soft);font-size:15px;margin:0 0 16px;text-align:center;}
+  .picker-head{display:flex;gap:10px;}
+  .picker-head select{flex:1;padding:10px;border-radius:8px;font-size:13.5px;}
+  .cal-weekdays{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:16px;font-size:11px;color:var(--parchment-dim);text-align:center;}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:8px;}
+  .cal-day{padding:9px 0;text-align:center;border-radius:8px;font-size:13px;color:var(--parchment);cursor:pointer;background:transparent;border:1px solid transparent;}
+  .cal-day:hover{border-color:var(--line);}
+  .cal-day.selected{background:var(--gold);color:#1a1408;font-weight:700;}
+  .cal-day.empty{visibility:hidden;cursor:default;}
+  .picker-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:20px;}
+  .picker-cancel{background:transparent;border:1px solid var(--line);color:var(--parchment-dim);padding:10px 18px;border-radius:10px;cursor:pointer;font-size:13px;font-family:inherit;}
+  .picker-confirm{width:auto;padding:10px 24px;}
+  .radio-group{display:flex;gap:10px;}
+  .radio-pill{flex:1;}
+  .radio-pill input{display:none;}
+  .radio-pill label{
+    display:block;text-align:center;padding:11px 8px;border-radius:10px;
+    border:1px solid var(--line);color:var(--parchment-dim);font-size:13.5px;cursor:pointer;
+    margin:0;transition:all .15s ease;
+  }
+  .radio-pill input:checked + label{
+    background:var(--gold);color:#1a1408;border-color:var(--gold);font-weight:700;
+  }
+  .checkbox-row{display:flex;align-items:flex-start;gap:10px;font-size:12.5px;color:var(--parchment-dim);margin-bottom:26px;}
+  .checkbox-row input{margin-top:3px;}
+  .checkbox-row a{color:var(--gold-soft);text-decoration:underline;}
+  .interest-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+  .check-pill input{display:none;}
+  .check-pill label{
+    display:block;text-align:center;padding:11px 6px;border-radius:10px;
+    border:1px solid var(--line);color:var(--parchment-dim);font-size:13px;cursor:pointer;
+    margin:0;transition:all .15s ease;
+  }
+  .check-pill input:checked + label{
+    background:var(--vermillion);color:#fbe9e5;border-color:var(--vermillion);font-weight:700;
+  }
+  .submit-btn{
+    width:100%;padding:16px;border-radius:12px;border:none;
+    background:linear-gradient(135deg, var(--gold-soft), var(--gold));
+    color:#1a1408;font-weight:800;font-size:16px;cursor:pointer;letter-spacing:.3px;
+  }
+  .submit-btn:disabled{opacity:.5;cursor:not-allowed;}
+  .form-foot-note{text-align:center;font-size:11.5px;color:var(--parchment-dim);margin-top:16px;}
+
+  .success-box{display:none;text-align:center;padding:20px 8px;}
+  .success-box .mark{font-family:'Gowun Batang',serif;font-size:38px;color:var(--gold-soft);margin-bottom:14px;}
+  .success-box h3{margin:0 0 8px;font-size:19px;color:var(--parchment);}
+  .success-box p{margin:0;font-size:14px;color:var(--parchment-dim);}
+
+  footer{padding:48px 0 32px;text-align:center;border-top:1px solid var(--line);}
+  footer .foot-logo{font-family:'Gowun Batang',serif;font-size:16px;color:var(--gold-soft);margin-bottom:8px;}
+  footer p{font-size:11.5px;color:var(--parchment-dim);margin:4px 0;}
+  footer .foot-links{margin-top:18px;display:flex;align-items:center;justify-content:center;gap:14px;}
+  footer .admin-link{display:inline-block;font-size:11px;color:#4a4636;text-decoration:none;}
+  footer .kakao-link{display:inline-block;font-size:11px;color:var(--parchment-dim);text-decoration:none;}
+  footer .kakao-link:hover{color:var(--gold-soft);}
+
+  /* ---------- 카카오톡 플로팅 버튼 (하단 우측 고정) ---------- */
+  .kakao-float{
+    position:fixed;right:22px;bottom:22px;z-index:70;
+    width:56px;height:56px;border-radius:50%;
+    background:#FEE500;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 12px 26px -8px rgba(0,0,0,0.55);
+    text-decoration:none;transition:transform .2s ease, box-shadow .2s ease;
+  }
+  .kakao-float:hover{transform:translateY(-3px);box-shadow:0 16px 30px -8px rgba(0,0,0,0.6);}
+  .kakao-float svg{width:28px;height:28px;display:block;}
+  @media (max-width:600px){
+    .kakao-float{right:16px;bottom:16px;width:50px;height:50px;}
+    .kakao-float svg{width:25px;height:25px;}
+  }
+
+  @media (max-width:720px){
+    .reasons{grid-template-columns:1fr;}
+    .row2{grid-template-columns:1fr;}
+    .pillar .hanja{font-size:24px;}
+    .form-card{padding:32px 20px;}
+    .interest-grid{grid-template-columns:repeat(2,1fr);}
+    .reunion-points{grid-template-columns:1fr;}
+    .reunion-point{text-align:left;}
+  }
+
+  /* ---------- admin ---------- */
+  #adminOverlay{
+    position:fixed;inset:0;background:rgba(10,10,18,0.95);z-index:200;
+    display:none;align-items:center;justify-content:center;padding:20px;
+  }
+  .admin-box{background:var(--midnight);border:1px solid var(--line);border-radius:16px;padding:32px;max-width:360px;width:100%;text-align:center;}
+  .admin-box input{margin:16px 0;text-align:center;}
+  #adminPanel{
+    position:fixed;inset:0;background:var(--ink);z-index:150;display:none;overflow-y:auto;padding:32px 20px 60px;
+  }
+  .admin-header{max-width:1000px;margin:0 auto 24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;}
+  .admin-header h2{font-family:'Gowun Batang',serif;color:var(--gold-soft);margin:0;}
+  .admin-tabs{display:flex;gap:8px;}
+  .admin-tab{
+    background:transparent;border:1px solid var(--line);color:var(--parchment-dim);
+    padding:9px 18px;border-radius:999px;font-size:13px;cursor:pointer;
+  }
+  .admin-tab.active{background:var(--gold);color:#1a1408;border-color:var(--gold);font-weight:700;}
+  .admin-actions button{
+    background:var(--midnight);border:1px solid var(--line);color:var(--parchment);
+    padding:9px 16px;border-radius:8px;font-size:13px;cursor:pointer;margin-left:8px;
+  }
+  .admin-actions button.danger{border-color:var(--vermillion);color:#e8a89e;}
+  table{width:100%;max-width:1000px;margin:0 auto;border-collapse:collapse;font-size:13px;}
+  th,td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap;}
+  th{color:var(--gold-soft);font-weight:700;}
+  td.del{cursor:pointer;color:#e8a89e;}
+  .empty-state{text-align:center;color:var(--parchment-dim);padding:60px 0;}
+
+  /* ---------- admin: 홈페이지 문구 관리 ---------- */
+  .settings-intro{font-size:13px;color:var(--parchment-dim);margin:0 0 20px;}
+  .settings-group{border:1px solid var(--line);border-radius:14px;margin-bottom:14px;overflow:hidden;background:var(--midnight);}
+  .settings-group summary{
+    cursor:pointer;padding:15px 18px;font-size:14.5px;font-weight:700;color:var(--gold-soft);
+    list-style:none;display:flex;align-items:center;justify-content:space-between;
+  }
+  .settings-group summary::-webkit-details-marker{display:none;}
+  .settings-group summary::after{content:'+';font-size:18px;color:var(--parchment-dim);transition:transform .2s ease;}
+  .settings-group[open] summary::after{content:'−';}
+  .settings-group .settings-body{padding:4px 18px 18px;border-top:1px solid var(--line);}
+  .settings-field{margin-top:16px;}
+  .settings-field label{display:block;font-size:12.5px;color:var(--parchment-dim);margin-bottom:6px;}
+  .settings-field textarea, .settings-field input[type=text]{
+    width:100%;padding:11px 13px;border-radius:10px;border:1px solid var(--line);
+    background:var(--ink);color:var(--parchment);font-size:14px;font-family:inherit;resize:vertical;
+  }
+  .settings-save-bar{
+    position:sticky;bottom:0;display:flex;justify-content:flex-end;gap:10px;
+    padding:14px 0 4px;margin-top:6px;background:linear-gradient(0deg, var(--ink) 60%, transparent);
+  }
 </style>
 </head>
 <body>
 
+<div class="sky" id="sky"></div>
+
 <header class="nav">
   <div class="nav-inner">
-    <a href="#top" class="brand"><span class="brand-seal">結</span>결명당</a>
-    <nav class="nav-links">
-      <a href="#moments">이럴 때</a>
-      <a href="#expert">역술가 소개</a>
-      <a href="#reviews">후기</a>
-      <a href="#faq">FAQ</a>
-    </nav>
-    <a href="#apply" class="btn btn-cta">신청하기</a>
+    <div class="logo" style="display:flex;align-items:center;gap:10px;">
+      <span>명운당<small>命 運 堂</small></span>
+    </div>
+    <button class="nav-cta" id="navCtaBtn" onclick="document.getElementById('applyForm').scrollIntoView({behavior:'smooth'})">사주풀이</button>
   </div>
 </header>
 
-<main id="top">
+<main>
+  <section class="hero wrap">
+    <span class="eyebrow" id="heroEyebrow">사주풀이 이벤트</span>
+    <h1 id="heroTitle">年 · 月 · 日 · 時<br>네 개의 기둥에 새겨진<br><span class="accent">당신의 운명을 풀어드립니다</span></h1>
+    <p class="hero-sub" id="heroSub">생년월일시 네 글자만으로 완성되는 사주팔자. 명운당 정통 명리학자가 당신의 사주 원국을 풀이해드립니다.</p>
+    <a class="btn-primary" id="heroBtn" href="#applyForm">사주풀이 신청하기</a>
+    <p class="hero-note" id="heroNote">신청 후 24시간 이내 카카오톡으로 결과를 안내드립니다</p>
 
-  <section class="hero">
-    <div class="hero-inner">
-      <p class="eyebrow">사주단자 신청</p>
-      <h1>태어난 순간에 새겨진<br>여덟 글자를 풀어드립니다</h1>
-      <p class="hero-sub">생년월일시만 남겨주세요.<br>신청하시면 전문 역술가가 사주를 풀어드립니다.</p>
-      <div class="hero-cta">
-        <a href="#apply" class="btn btn-primary">사주단자 작성하기</a>
-        <span class="hero-note">작성에 1분이면 충분합니다</span>
+    <div class="chart-wrap">
+      <p class="chart-label" id="chartLabel">사주 명식 예시 (SAMPLE)</p>
+      <div class="pillars" id="pillars">
+        <div class="pillar"><div class="name">시주 時</div><div class="hanja">庚</div><div class="hanja jiji">午</div></div>
+        <div class="pillar"><div class="name">일주 日</div><div class="hanja">戊</div><div class="hanja jiji">辰</div></div>
+        <div class="pillar"><div class="name">월주 月</div><div class="hanja">丙</div><div class="hanja jiji">寅</div></div>
+        <div class="pillar"><div class="name">년주 年</div><div class="hanja">甲</div><div class="hanja jiji">子</div></div>
       </div>
-
-      <div class="pillars" aria-hidden="true">
-        <div class="pillar" style="--d:0s"><span class="pillar-label">년주</span><span class="pillar-hanja">甲子</span><span class="pillar-mark"></span></div>
-        <div class="pillar" style="--d:.15s"><span class="pillar-label">월주</span><span class="pillar-hanja">丙寅</span><span class="pillar-mark"></span></div>
-        <div class="pillar" style="--d:.3s"><span class="pillar-label">일주</span><span class="pillar-hanja">戊午</span><span class="pillar-mark"></span></div>
-        <div class="pillar" style="--d:.45s"><span class="pillar-label">시주</span><span class="pillar-hanja">庚申</span><span class="pillar-mark"></span></div>
-      </div>
-      <p class="pillars-caption">년주 · 월주 · 일주 · 시주 — 네 개의 기둥, 여덟 글자. 그것이 사주팔자(四柱八字)입니다</p>
+      <p class="chart-caption" id="chartCaption">신청서를 남기시면 당신만의 사주 원국을 직접 풀이해드립니다</p>
     </div>
   </section>
 
-  <section class="moments grain reveal" id="moments">
-    <h2>이런 순간, 사주가 방향을 알려줍니다</h2>
-    <div class="moment-grid">
-      <div class="moment-card">
-        <span class="moment-icon">緣</span>
-        <h3>인연과 연애</h3>
-        <p>지금 만나는 사람과의 궁합, 언제쯤 좋은 인연이 올지 궁금할 때</p>
+  <section class="reunion-section">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="reunion-glyph">重逢</div>
+        <div class="section-eyebrow" id="reunionEyebrow" style="color:#e8a89e;">재회운 특화 상담</div>
+        <h2 class="section-title" id="reunionTitle">헤어진 그 사람,<br>정말 다시 만날 수 있을까요?</h2>
+        <p class="section-desc" id="reunionDesc">재회는 감정만으로는 알 수 없습니다. 두 사람이 다시 이어지는 시기와 방식은 사주에 이미 새겨져 있습니다. 상담을 받으신 많은 분들이 "어떻게 이렇게까지 맞을까" 놀라시는 부분이 바로 재회운입니다.</p>
       </div>
-      <div class="moment-card">
-        <span class="moment-icon">業</span>
-        <h3>이직과 사업</h3>
-        <p>퇴사와 창업, 계약 시점처럼 되돌리기 어려운 결정을 앞뒀을 때</p>
+      <div class="reunion-points" id="reunionPoints">
+        <div class="reunion-point"><div class="num">01</div><h3 id="reunionP1Title">재회 가능 시기</h3><p id="reunionP1Desc">다시 연락이 닿거나 마주칠 수 있는 시기를 짚어드립니다.</p></div>
+        <div class="reunion-point"><div class="num">02</div><h3 id="reunionP2Title">재회를 막는 걸림돌</h3><p id="reunionP2Desc">두 사람 사이에 아직 남아있는 감정과 오해의 기운을 확인합니다.</p></div>
+        <div class="reunion-point"><div class="num">03</div><h3 id="reunionP3Title">다가가는 방법과 타이밍</h3><p id="reunionP3Desc">먼저 연락해도 좋을 때와 기다려야 할 때를 알려드립니다.</p></div>
       </div>
-      <div class="moment-card">
-        <span class="moment-icon">宅</span>
-        <h3>이사와 개업일</h3>
-        <p>이사 날짜, 개업일, 계약일처럼 날짜 하나가 마음에 걸릴 때</p>
-      </div>
-      <div class="moment-card">
-        <span class="moment-icon">路</span>
-        <h3>인생의 갈림길</h3>
-        <p>선택지는 많은데 무엇을 골라야 할지 스스로 확신이 서지 않을 때</p>
+      <p class="reunion-note" id="reunionNote">신청서에 헤어진 상대방의 정보를 함께 남겨주시면, 두 사람의 사주를 함께 짚어보는 재회운 풀이도 함께 진행해드립니다.</p>
+      <div class="reunion-video">
+        <video id="reunionVideo" autoplay muted loop playsinline webkit-playsinline="true" x5-playsinline="true" disablePictureInPicture disableRemotePlayback preload="auto">
+          <source src="reunion-video.mp4" type="video/mp4">
+          브라우저가 동영상 재생을 지원하지 않습니다.
+        </video>
       </div>
     </div>
   </section>
 
-  <section class="expert reveal" id="expert">
-    <div class="expert-inner">
-      <div class="expert-photo"><span>素</span></div>
-      <div class="expert-text">
-        <p class="eyebrow">역술가 소개</p>
-        <h2>결명당 대표 역술가 소경(素景)</h2>
-        <p>명리학과 자평명리를 오래 연구하며 상담을 이어온 결명당은, 화려한 말보다 근거 있는 풀이를 우선합니다. 사주팔자와 대운의 흐름을 함께 짚어드립니다.</p>
-        <ul class="expert-stats">
-          <li><strong>1,000+</strong><span>누적 상담</span></li>
-          <li><strong>당일 회신</strong><span>신청 후 연락</span></li>
-        </ul>
-      </div>
+  <section class="wrap">
+    <div class="section-head">
+      <h2 class="section-title" id="reasonsTitle">왜 사주를 봐야 할까요</h2>
+      <p class="section-desc" id="reasonsDesc">태어난 순간의 기운은 평생 바뀌지 않는 나만의 지도입니다</p>
+    </div>
+    <div class="reasons" id="reasons">
+      <div class="reason-card"><div class="reason-glyph">緣</div><h3 id="reason1Title">인연과 애정운</h3><p id="reason1Desc">지금 만나는 사람과의 궁합, 다가올 인연의 시기를 확인해보세요.</p></div>
+      <div class="reason-card"><div class="reason-glyph">財</div><h3 id="reason2Title">재물과 사업운</h3><p id="reason2Desc">돈이 들어오고 나가는 흐름, 지금이 투자와 결정의 적기인지 짚어드립니다.</p></div>
+      <div class="reason-card"><div class="reason-glyph">健</div><h3 id="reason3Title">건강과 시기운</h3><p id="reason3Desc">몸과 마음이 약해지기 쉬운 시기를 미리 알면 준비할 수 있습니다.</p></div>
     </div>
   </section>
 
-  <section class="character-video reveal">
-    <div class="character-video-inner">
-      <video id="charVideo" controls playsinline>
-        <source id="charVideoSource" src="" type="video/mp4">
-      </video>
-      <p class="video-placeholder" id="charVideoPlaceholder">캐릭터 영상을 준비 중입니다</p>
+  <section class="wrap process">
+    <div class="section-head">
+      <div class="section-eyebrow" id="processEyebrow">HOW IT WORKS</div>
+      <h2 class="section-title" id="processTitle">신청부터 상담까지</h2>
+    </div>
+    <div class="steps" id="steps">
+      <div class="step"><div class="step-num">一</div><div><h3 id="step1Title">신청서 작성</h3><p id="step1Desc">생년월일시를 남겨주세요. 정확할수록 풀이도 정밀해집니다.</p></div></div>
+      <div class="step"><div class="step-num">二</div><div><h3 id="step2Title">사주 원국 분석</h3><p id="step2Desc">명리학자가 사주팔자와 오행의 균형을 꼼꼼히 짚어봅니다.</p></div></div>
+      <div class="step"><div class="step-num">三</div><div><h3 id="step3Title">카카오톡 상담</h3><p id="step3Desc">24시간 이내 풀이 결과를 편하신 방법으로 안내드립니다.</p></div></div>
     </div>
   </section>
 
-  <section class="reviews reveal" id="reviews">
-    <h2>먼저 다녀가신 분들의 후기</h2>
-    <div class="review-grid">
-      <article class="review-card">
-        <span class="review-stamp">結</span>
-        <p>"이직 시점 때문에 반년을 고민했는데, 대운 흐름을 짚어주셔서 마음을 정했어요."</p>
-        <span class="review-name">30대 · 직장인</span>
-      </article>
-      <article class="review-card">
-        <span class="review-stamp">結</span>
-        <p>"태어난 시간을 몰라서 걱정했는데 일주만으로도 꽤 정확하게 봐주셨어요."</p>
-        <span class="review-name">20대 · 대학원생</span>
-      </article>
-      <article class="review-card">
-        <span class="review-stamp">結</span>
-        <p>"개업일 잡을 때 상담받았는데, 설명이 구체적이라 믿음이 갔습니다."</p>
-        <span class="review-name">40대 · 자영업</span>
-      </article>
+  <section class="wrap form-section" id="applyForm">
+    <div class="section-head">
+      <div class="section-eyebrow" id="formEyebrow">APPLICATION</div>
+      <h2 class="section-title" id="formTitle">사주풀이 신청</h2>
+      <p class="section-desc" id="formDesc">아래 정보를 남겨주시면 순서대로 연락드립니다</p>
     </div>
-  </section>
 
-  <section class="apply reveal" id="apply">
-    <div class="apply-inner">
-      <p class="eyebrow">사주단자 작성</p>
-      <h2>사주단자(四柱單子)를 남겨주세요</h2>
-      <p class="apply-sub">예로부터 생년월일시를 적어 건네는 종이를 사주단자라 불렀습니다. 아래 정보를 남겨주시면 순서대로 연락드립니다.</p>
-
-      <form id="leadForm" class="lead-form">
-        <div class="form-row">
-          <label>이름
-            <input type="text" name="name" required placeholder="홍길동">
-          </label>
-          <label>
-            <span class="field-head">연락처
-              <span class="radio-group">
-                <label><input type="radio" name="contactType" value="이메일" checked> 이메일</label>
-                <label><input type="radio" name="contactType" value="카카오톡 아이디"> 카카오톡 아이디</label>
-              </span>
-            </span>
-            <input type="text" name="contactValue" id="contactValue" required placeholder="example@email.com">
-          </label>
+    <div class="form-card">
+      <form id="leadForm">
+        <div class="field">
+          <label for="f-name">이름</label>
+          <input type="text" id="f-name" placeholder="홍길동" required>
+          <p class="hint">한글로만 입력해주세요 (영어, 숫자 입력 불가)</p>
         </div>
 
-        <div class="form-row">
-          <label>성별
-            <div class="radio-group">
-              <label><input type="radio" name="gender" value="여성" checked> 여성</label>
-              <label><input type="radio" name="gender" value="남성"> 남성</label>
-              <label><input type="radio" name="gender" value="응답 안 함"> 응답 안 함</label>
+        <div class="field">
+          <label>성별</label>
+          <div class="radio-group">
+            <div class="radio-pill">
+              <input type="radio" name="gender" id="g-m" value="남자" required>
+              <label for="g-m">남자</label>
             </div>
-          </label>
-        </div>
-
-        <div class="form-row">
-          <label>생년월일 기준
-            <div class="radio-group">
-              <label><input type="radio" name="calendar" value="양력" checked> 양력</label>
-              <label><input type="radio" name="calendar" value="음력"> 음력</label>
+            <div class="radio-pill">
+              <input type="radio" name="gender" id="g-f" value="여자">
+              <label for="g-f">여자</label>
             </div>
-          </label>
-          <label>생년월일
-            <input type="date" name="birthdate" required>
-          </label>
+          </div>
         </div>
 
-        <div class="form-row">
-          <label>태어난 시간 (시진)
-            <select name="birthtime">
-              <option value="모름">모름 (시간 모름)</option>
-              <option>자시 (23:30~01:29)</option>
-              <option>축시 (01:30~03:29)</option>
-              <option>인시 (03:30~05:29)</option>
-              <option>묘시 (05:30~07:29)</option>
-              <option>진시 (07:30~09:29)</option>
-              <option>사시 (09:30~11:29)</option>
-              <option>오시 (11:30~13:29)</option>
-              <option>미시 (13:30~15:29)</option>
-              <option>신시 (15:30~17:29)</option>
-              <option>유시 (17:30~19:29)</option>
-              <option>술시 (19:30~21:29)</option>
-              <option>해시 (21:30~23:29)</option>
-            </select>
-          </label>
-          <label>궁금한 운(運)
-            <select name="topic">
-              <option>종합운</option>
-              <option>연애·결혼</option>
-              <option>재회운</option>
-              <option>재물·사업</option>
-              <option>진로·이직</option>
-              <option>건강</option>
-            </select>
-          </label>
+        <div class="field">
+          <label>생년월일</label>
+          <div class="row2" style="margin-bottom:10px;">
+            <div class="radio-group">
+              <div class="radio-pill">
+                <input type="radio" name="calendar" id="c-solar" value="양력" checked>
+                <label for="c-solar">양력</label>
+              </div>
+              <div class="radio-pill">
+                <input type="radio" name="calendar" id="c-lunar" value="음력">
+                <label for="c-lunar">음력</label>
+              </div>
+            </div>
+          </div>
+          <div class="picker-trigger" id="birthTrigger" tabindex="0" role="button">
+            <span id="birthDisplay" class="picker-placeholder">날짜를 선택해주세요</span>
+            <svg class="picker-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c9a24b" stroke-width="1.6"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+          </div>
+          <input type="hidden" id="f-birth">
         </div>
 
-        <div class="form-row" style="grid-template-columns:1fr;">
-          <label>남기고 싶은 말 (선택)
-            <textarea name="memo" rows="3" placeholder="구체적으로 남겨주시면 상담에 도움이 됩니다"></textarea>
-          </label>
+        <div class="field">
+          <label for="f-time">태어난 시간</label>
+          <div class="row2">
+            <div class="picker-trigger" id="timeTrigger" tabindex="0" role="button">
+              <span id="timeDisplay" class="picker-placeholder">시간을 선택해주세요</span>
+              <svg class="picker-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c9a24b" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+            </div>
+            <input type="hidden" id="f-time">
+            <div class="radio-pill">
+              <input type="checkbox" id="f-time-unknown">
+              <label for="f-time-unknown" style="display:flex;align-items:center;justify-content:center;height:100%;">시간 모름</label>
+            </div>
+          </div>
+          <p class="hint">정확한 시간을 모르셔도 풀이는 가능합니다</p>
         </div>
 
-        <label class="agree">
-          <input type="checkbox" required>
-          <span>(동의) 남겨주신 정보는 사주 상담 목적으로만 사용되며, 상담 종료 후 파기됩니다.</span>
-        </label>
+        <div class="field">
+          <label for="f-kakao">카카오톡 ID (선택)</label>
+          <input type="text" id="f-kakao" placeholder="카카오톡으로 상담을 원하시면 입력해주세요">
+        </div>
 
-        <button type="submit" class="btn btn-primary btn-submit">사주단자 남기기</button>
+        <div class="field">
+          <label for="f-email">이메일 주소 (선택)</label>
+          <input type="email" id="f-email" placeholder="example@email.com">
+        </div>
+
+        <div class="field">
+          <label>받고 싶은 상담을 선택해주세요 (중복 선택 가능)</label>
+          <div class="interest-grid">
+            <div class="check-pill"><input type="checkbox" name="interest" id="int-reunion" value="재회운"><label for="int-reunion">재회운</label></div>
+            <div class="check-pill"><input type="checkbox" name="interest" id="int-love" value="애정운"><label for="int-love">애정운</label></div>
+            <div class="check-pill"><input type="checkbox" name="interest" id="int-money" value="재물운"><label for="int-money">재물운</label></div>
+            <div class="check-pill"><input type="checkbox" name="interest" id="int-job" value="취업운"><label for="int-job">취업운</label></div>
+            <div class="check-pill"><input type="checkbox" name="interest" id="int-health" value="건강운"><label for="int-health">건강운</label></div>
+            <div class="check-pill"><input type="checkbox" name="interest" id="int-match" value="궁합"><label for="int-match">궁합</label></div>
+            <div class="check-pill"><input type="checkbox" name="interest" id="int-year" value="신년운세"><label for="int-year">신년운세</label></div>
+            <div class="check-pill"><input type="checkbox" name="interest" id="int-move" value="이사·이직운"><label for="int-move">이사·이직운</label></div>
+          </div>
+          <div id="reunionFields" style="display:none;margin-top:16px;padding:18px;border:1px solid rgba(183,64,47,0.35);border-radius:14px;background:rgba(183,64,47,0.06);">
+            <p class="hint" style="margin:0 0 14px;color:#e8a89e;">재회운을 선택하셨네요 — 상대방 정보를 함께 남겨주시면 더 정확하게 풀이해드립니다</p>
+            <div class="field" style="margin-bottom:16px;">
+              <label>상대방 성별</label>
+              <div class="radio-group">
+                <div class="radio-pill">
+                  <input type="radio" name="exGender" id="ex-m" value="남자">
+                  <label for="ex-m">남자</label>
+                </div>
+                <div class="radio-pill">
+                  <input type="radio" name="exGender" id="ex-f" value="여자">
+                  <label for="ex-f">여자</label>
+                </div>
+              </div>
+            </div>
+            <div class="field" style="margin-bottom:16px;">
+              <label>상대방 생년월일</label>
+              <div class="picker-trigger" id="exBirthTrigger" tabindex="0" role="button">
+                <span id="exBirthDisplay" class="picker-placeholder">날짜를 선택해주세요</span>
+                <svg class="picker-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c9a24b" stroke-width="1.6"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+              </div>
+              <input type="hidden" id="f-ex-birth">
+            </div>
+            <div class="field" style="margin-bottom:16px;">
+              <label for="f-breakup">헤어진 시기 (대략적으로)</label>
+              <input type="text" id="f-breakup" placeholder="예: 2025년 겨울, 3개월 전">
+            </div>
+            <div class="field" style="margin-bottom:0;">
+              <label for="f-situation">상황 설명 (선택)</label>
+              <textarea id="f-situation" maxlength="1500" rows="5" placeholder="헤어진 이유, 현재 상황, 궁금한 점 등을 자유롭게 남겨주시면 상담에 참고하겠습니다." style="width:100%;resize:vertical;background:rgba(255,255,255,0.04);border:1px solid var(--line);border-radius:10px;padding:12px 14px;color:var(--parchment);font-family:'Noto Sans KR',sans-serif;font-size:14px;line-height:1.6;"></textarea>
+              <p class="hint" id="situationCount" style="margin:6px 0 0;text-align:right;color:var(--parchment-dim);font-size:12px;">0 / 1,500자</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="checkbox-row">
+          <input type="checkbox" id="f-agree" required>
+          <label for="f-agree" id="agreeText">사주풀이 상담을 위해 남겨주신 개인정보(이름, 생년월일시)를 수집·이용하는 것에 동의합니다. 수집된 정보는 상담 목적 외에는 사용되지 않으며, 상담 완료 후 안전하게 폐기됩니다.</label>
+        </div>
+
+        <button type="submit" class="submit-btn" id="submitBtn">사주풀이 신청하기</button>
+        <p class="form-foot-note" id="formFootNote">신청서는 결제나 회원가입 없이 진행됩니다</p>
       </form>
+
+      <div class="success-box" id="successBox">
+        <div class="mark">申</div>
+        <h3 id="successTitle">신청이 완료되었습니다</h3>
+        <p id="successDesc">남겨주신 카카오톡으로 24시간 이내에<br>사주풀이 결과를 안내드리겠습니다.</p>
+      </div>
     </div>
   </section>
 
-  <section class="faq reveal" id="faq">
-    <h2>자주 묻는 질문</h2>
-    <div class="faq-list">
-      <details>
-        <summary>카카오톡 상담인가요, 대면 상담인가요?</summary>
-        <p>신청서 접수 후 담당 역술가가 먼저 카카오톡으로 연락드리며, 원하시면 대면 상담으로 이어갑니다.</p>
-      </details>
-      <details>
-        <summary>태어난 시간을 정확히 몰라요.</summary>
-        <p>시간을 모르셔도 접수 가능합니다. "모름"을 선택해주세요. 년주·월주·일주만으로도 상당 부분 풀이가 가능합니다.</p>
-      </details>
-      <details>
-        <summary>양력과 음력, 어떤 걸 입력해야 하나요?</summary>
-        <p>알고 계신 대로 입력하시면 됩니다. 담당자가 확인 후 정확히 환산해드립니다.</p>
-      </details>
-      <details>
-        <summary>상담 비용이 있나요?</summary>
-        <p>상담 비용은 상담 항목과 방식에 따라 달라지며, 접수 시 자세히 안내해드립니다.</p>
-      </details>
+  <footer class="wrap">
+    <div class="foot-logo">명운당 命運堂</div>
+    <p id="footerNotice">본 페이지는 상담 신청 접수를 위한 안내 페이지입니다.</p>
+    <p id="footBizInfo">상호 · 사업자등록번호 · 주소 등 실제 정보로 교체해주세요.</p>
+    <div class="foot-links">
+      <a href="#" id="footKakaoLink" class="kakao-link" target="_blank" rel="noopener noreferrer" onclick="return guardKakaoLink(this)">카카오톡 상담하기</a>
+      <a href="#admin" class="admin-link">관리자</a>
     </div>
-  </section>
-
+  </footer>
 </main>
 
-<footer class="site-footer">
-  <p>결명당<span id="footerKakaoWrap"></span> · 평일 10:00–22:00</p>
-  <p class="footer-fine">신청서를 통해 수집된 정보는 상담 목적 외에 사용되지 않습니다.</p>
-</footer>
+<!-- ===== 카카오톡 플로팅 버튼 ===== -->
+<a href="#" id="kakaoFloatBtn" class="kakao-float" target="_blank" rel="noopener noreferrer" aria-label="카카오톡 상담하기" onclick="return guardKakaoLink(this)">
+  <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <path fill="#391B1B" d="M16 6C9.373 6 4 10.24 4 15.47c0 3.31 2.17 6.22 5.44 7.9-.24.86-.87 3.1-1 3.58-.16.6.22.6.46.44.19-.13 3.03-2.02 4.26-2.84.92.13 1.87.2 2.84.2 6.627 0 12-4.24 12-9.47C28 10.24 22.627 6 16 6z"/>
+  </svg>
+</a>
 
-<div id="successModal" class="modal-overlay hidden">
-  <div class="modal modal-wide">
-    <span class="success-seal">結</span>
-    <h3>사주단자가 접수되었습니다</h3>
-    <p>아래 영상을 확인해주세요.</p>
-
-    <div class="result-video-wrap">
-      <video id="resultVideo" autoplay muted playsinline loop>
-        <source id="resultVideoSource" src="" type="video/mp4">
-      </video>
-      <p class="video-placeholder" id="resultVideoPlaceholder">영상을 준비 중입니다</p>
+<!-- ===== Admin: password gate ===== -->
+<div id="adminOverlay">
+  <div class="admin-box">
+    <div class="foot-logo" style="margin-bottom:6px;">관리자 접속</div>
+    <p style="font-size:13px;color:var(--parchment-dim);margin:0;">신청 내역을 확인하려면 비밀번호를 입력하세요</p>
+    <input type="password" id="adminPw" placeholder="비밀번호" onkeydown="if(event.key==='Enter') checkAdminPw()">
+    <div>
+      <button class="submit-btn" style="width:auto;padding:12px 28px;" onclick="checkAdminPw()">확인</button>
     </div>
-
-    <a href="#" id="kakaoLinkBtn" target="_blank" rel="noopener" class="kakao-link-btn" style="display:none;">카카오톡으로 상담 이어가기</a>
-
-    <div class="deposit-box">
-      <p class="deposit-label">상담 확정 입금 계좌</p>
-      <div class="deposit-account">
-        <span id="depositAccountText">계좌 정보를 준비 중입니다</span>
-        <button id="copyAccount" class="copy-btn" type="button">복사</button>
-      </div>
-    </div>
-
-    <button id="successClose" class="btn btn-secondary" style="margin-top:1.2rem;">닫기</button>
   </div>
 </div>
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+<!-- ===== Admin: panel ===== -->
+<div id="adminPanel">
+  <div class="admin-header">
+    <h2 id="adminPanelTitle">사주풀이 신청 내역</h2>
+    <div class="admin-tabs">
+      <button type="button" class="admin-tab active" id="tabLeadsBtn" onclick="switchAdminTab('leads')">신청 내역</button>
+      <button type="button" class="admin-tab" id="tabSettingsBtn" onclick="switchAdminTab('settings')">홈페이지 문구 관리</button>
+    </div>
+    <div class="admin-actions" id="leadsActions">
+      <button onclick="exportCSV()">CSV 다운로드</button>
+      <button class="danger" onclick="clearAll()">전체 삭제</button>
+      <button onclick="closeAdmin()">닫기</button>
+    </div>
+    <div class="admin-actions" id="settingsActions" style="display:none;">
+      <button onclick="closeAdmin()">닫기</button>
+    </div>
+  </div>
 
-  // ===== Firebase 설정 =====
-  var firebaseConfig = {
-    apiKey: "AIzaSyDhITRXZ9YTzK5ws5oSsn94p7uBLN7UxIM",
-    authDomain: "saju2-6bccd.firebaseapp.com",
-    projectId: "saju2-6bccd",
-    storageBucket: "saju2-6bccd.firebasestorage.app",
-    messagingSenderId: "685044350510",
-    appId: "1:685044350510:web:a0857ffb29e2023d82e9bf"
-  };
-  var firebaseApp = initializeApp(firebaseConfig);
-  var db = getFirestore(firebaseApp);
+  <div id="adminTabLeads">
+    <div id="adminTableWrap" class="wrap"></div>
+  </div>
 
-  // ===== 사이트 설정 — 값이 바뀔 때마다 이 부분만 직접 수정하세요 =====
-  var CONFIG = {
-    kakaoId: '',        // 카카오톡 상담 아이디 (푸터에 표시). 비워두면 표시 안 됨
-    kakaoLink: '',       // 카카오톡 오픈채팅 링크 (접수 완료 화면 버튼). 비워두면 버튼 숨김. 예: https://open.kakao.com/o/xxxxxxx
-    charVideoUrl: '',    // 캐릭터 소개 영상 mp4 URL (통계-후기 사이 섹션)
-    resultVideoUrl: '',  // 신청 완료 후 재생되는 영상 mp4 URL
-    depositAccount: ''   // 입금 계좌 정보. 예: 국민은행 123456-78-901234 홍길동
-  };
-  // ================================================================
+  <div id="adminTabSettings" class="wrap" style="display:none;max-width:680px;">
+    <p class="settings-intro">홈페이지에 노출되는 문구를 섹션별로 모아두었습니다. 항목을 눌러 펼친 뒤 원하는 문구로 바꾸고 맨 아래 저장 버튼을 누르면 바로 반영됩니다. 줄을 바꾸고 싶으면 그냥 Enter를 눌러 입력하세요.</p>
+    <div id="settingsFieldsWrap"></div>
+    <div class="settings-save-bar">
+      <button class="submit-btn" style="width:auto;padding:11px 24px;" onclick="saveSiteSettings()">전체 저장</button>
+    </div>
+  </div>
+</div>
 
-  // ---- reveal on scroll ----
-  var revealEls = document.querySelectorAll('.reveal');
-  if('IntersectionObserver' in window){
-    var io = new IntersectionObserver(function(entries){
-      entries.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
-    }, {threshold:0.12});
-    revealEls.forEach(function(el){ io.observe(el); });
+<!-- ===== 날짜 선택 모달 ===== -->
+<div id="calendarOverlay" class="picker-overlay">
+  <div class="picker-box">
+    <p class="picker-title">생년월일 선택</p>
+    <div class="picker-head">
+      <select id="calYear"></select>
+      <select id="calMonth"></select>
+    </div>
+    <div class="cal-weekdays"><span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span></div>
+    <div class="cal-grid" id="calGrid"></div>
+    <div class="picker-actions">
+      <button type="button" class="picker-cancel" onclick="closeCalendar()">취소</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 시간 선택 모달 ===== -->
+<div id="timeOverlay" class="picker-overlay">
+  <div class="picker-box">
+    <p class="picker-title">태어난 시간 선택</p>
+    <div class="picker-head" style="justify-content:center;align-items:center;">
+      <select id="timeHour"></select>
+      <span style="color:var(--parchment-dim);font-size:13px;">시</span>
+      <select id="timeMinute"></select>
+      <span style="color:var(--parchment-dim);font-size:13px;">분</span>
+    </div>
+    <div class="picker-actions">
+      <button type="button" class="picker-cancel" onclick="closeTimeModal()">취소</button>
+      <button type="button" class="submit-btn picker-confirm" onclick="confirmTime()">확인</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* 관리자 비밀번호는 평문이 아니라 해시(SHA-256)로 저장되어 있어
+   코드를 열어봐도 실제 비밀번호를 알 수 없습니다.
+   비밀번호를 바꾸려면 브라우저 콘솔(F12)에서 아래처럼 실행한 뒤
+   나온 값을 ADMIN_PASSWORD_HASH 자리에 붙여넣으세요.
+   예) await sha256Hex('새비밀번호') */
+const ADMIN_PASSWORD_HASH = "5246272819cf9d3f50bdf7d03ac84ed65e5604ae8b4cd831e027813a258e03fc";
+async function sha256Hex(text){
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+const STORAGE_KEY = "myeongundang_leads";
+
+/* ---------- ambient stars ---------- */
+(function(){
+  const sky = document.getElementById('sky');
+  const count = 40;
+  for(let i=0;i<count;i++){
+    const s = document.createElement('div');
+    s.className = 'star';
+    const size = Math.random()*2 + 1;
+    s.style.width = size+'px';
+    s.style.height = size+'px';
+    s.style.left = Math.random()*100+'%';
+    s.style.top = Math.random()*70+'%';
+    s.style.animationDelay = (Math.random()*4)+'s';
+    sky.appendChild(s);
+  }
+})();
+
+/* ---------- scroll reveal ---------- */
+(function(){
+  const targets = document.querySelectorAll('.pillar, .reason-card, .step, .reunion-point');
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach((entry, i)=>{
+      if(entry.isIntersecting){
+        setTimeout(()=>entry.target.classList.add('show'), i*90);
+        io.unobserve(entry.target);
+      }
+    });
+  }, {threshold:0.2});
+  targets.forEach(t=>io.observe(t));
+})();
+
+/* ---------- 재회 영상: 모바일에서 재생 버튼 깜빡임 없이 바로 재생 ----------
+   영상이 실제로 재생을 시작(playing)하기 전까지는 투명하게 감춰두고,
+   재생이 시작되는 순간에만 살며시 나타나도록 해서
+   로딩 중 잠깐 보이는 재생 버튼이 눈에 띄지 않게 합니다. */
+(function(){
+  const vid = document.getElementById('reunionVideo');
+  if(!vid) return;
+  function markPlaying(){ vid.classList.add('is-playing'); }
+  vid.addEventListener('playing', markPlaying);
+  if(!vid.paused && vid.readyState > 2){ markPlaying(); }
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(entry=>{
+      if(entry.isIntersecting){
+        const p = vid.play();
+        if(p && typeof p.catch === 'function'){
+          p.catch(()=>{ /* 자동재생이 막히면 화면을 탭할 때 재생됩니다 */ });
+        }
+      }
+    });
+  }, {threshold:0.2});
+  io.observe(vid);
+})();
+
+/* ---------- date/time picker: 날짜·시간 선택 모달 ---------- */
+const CURRENT_YEAR = new Date().getFullYear();
+let calendarTarget = null; // { hiddenId, displayId }
+let calSelectedYear, calSelectedMonth, calSelectedDay;
+
+function initPickerSelects(){
+  const yearSel = document.getElementById('calYear');
+  for(let y = CURRENT_YEAR; y >= CURRENT_YEAR - 100; y--){
+    const opt = document.createElement('option');
+    opt.value = y; opt.textContent = y + '년';
+    yearSel.appendChild(opt);
+  }
+  const monthSel = document.getElementById('calMonth');
+  for(let m = 1; m <= 12; m++){
+    const opt = document.createElement('option');
+    opt.value = m; opt.textContent = m + '월';
+    monthSel.appendChild(opt);
+  }
+  const hourSel = document.getElementById('timeHour');
+  for(let h = 0; h <= 23; h++){
+    const opt = document.createElement('option');
+    opt.value = h; opt.textContent = String(h).padStart(2,'0');
+    hourSel.appendChild(opt);
+  }
+  const minSel = document.getElementById('timeMinute');
+  for(let mm = 0; mm <= 59; mm++){
+    const opt = document.createElement('option');
+    opt.value = mm; opt.textContent = String(mm).padStart(2,'0');
+    minSel.appendChild(opt);
+  }
+  yearSel.addEventListener('change', ()=>{ calSelectedYear = parseInt(yearSel.value); renderCalGrid(); });
+  monthSel.addEventListener('change', ()=>{ calSelectedMonth = parseInt(monthSel.value); renderCalGrid(); });
+}
+
+function openCalendar(hiddenId, displayId){
+  calendarTarget = { hiddenId, displayId };
+  const existing = document.getElementById(hiddenId).value;
+  const base = existing ? new Date(existing) : new Date(CURRENT_YEAR - 30, 0, 1);
+  calSelectedYear = existing ? base.getFullYear() : CURRENT_YEAR - 30;
+  calSelectedMonth = existing ? base.getMonth() + 1 : 1;
+  calSelectedDay = existing ? base.getDate() : null;
+  document.getElementById('calYear').value = calSelectedYear;
+  document.getElementById('calMonth').value = calSelectedMonth;
+  renderCalGrid();
+  document.getElementById('calendarOverlay').style.display = 'flex';
+}
+function closeCalendar(){
+  document.getElementById('calendarOverlay').style.display = 'none';
+  calendarTarget = null;
+}
+function renderCalGrid(){
+  const grid = document.getElementById('calGrid');
+  grid.innerHTML = '';
+  const firstDay = new Date(calSelectedYear, calSelectedMonth - 1, 1).getDay();
+  const daysInMonth = new Date(calSelectedYear, calSelectedMonth, 0).getDate();
+  for(let i = 0; i < firstDay; i++){
+    const empty = document.createElement('div');
+    empty.className = 'cal-day empty';
+    grid.appendChild(empty);
+  }
+  for(let d = 1; d <= daysInMonth; d++){
+    const btn = document.createElement('div');
+    btn.className = 'cal-day' + (d === calSelectedDay ? ' selected' : '');
+    btn.textContent = d;
+    btn.onclick = ()=> selectCalDay(d);
+    grid.appendChild(btn);
+  }
+}
+function selectCalDay(d){
+  calSelectedDay = d;
+  const mm = String(calSelectedMonth).padStart(2,'0');
+  const dd = String(d).padStart(2,'0');
+  const isoValue = `${calSelectedYear}-${mm}-${dd}`;
+  document.getElementById(calendarTarget.hiddenId).value = isoValue;
+  const displayEl = document.getElementById(calendarTarget.displayId);
+  displayEl.textContent = `${calSelectedYear}년 ${calSelectedMonth}월 ${d}일`;
+  displayEl.classList.remove('picker-placeholder');
+  closeCalendar();
+}
+
+let timeConfirmTargetHidden = 'f-time', timeConfirmTargetDisplay = 'timeDisplay';
+function openTimeModal(){
+  const existing = document.getElementById(timeConfirmTargetHidden).value;
+  const [h, m] = existing ? existing.split(':').map(Number) : [12, 0];
+  document.getElementById('timeHour').value = h;
+  document.getElementById('timeMinute').value = m;
+  document.getElementById('timeOverlay').style.display = 'flex';
+}
+function closeTimeModal(){
+  document.getElementById('timeOverlay').style.display = 'none';
+}
+function confirmTime(){
+  const h = document.getElementById('timeHour').value.padStart(2,'0');
+  const m = document.getElementById('timeMinute').value.padStart(2,'0');
+  document.getElementById(timeConfirmTargetHidden).value = `${h}:${m}`;
+  const displayEl = document.getElementById(timeConfirmTargetDisplay);
+  displayEl.textContent = `${h}시 ${m}분`;
+  displayEl.classList.remove('picker-placeholder');
+  closeTimeModal();
+}
+
+initPickerSelects();
+document.getElementById('birthTrigger').addEventListener('click', ()=> openCalendar('f-birth','birthDisplay'));
+document.getElementById('exBirthTrigger').addEventListener('click', ()=> openCalendar('f-ex-birth','exBirthDisplay'));
+document.getElementById('timeTrigger').addEventListener('click', openTimeModal);
+
+/* ---------- time-unknown toggle ---------- */
+const timeUnknown = document.getElementById('f-time-unknown');
+const timeTrigger = document.getElementById('timeTrigger');
+timeUnknown.addEventListener('change', ()=>{
+  if(timeUnknown.checked){
+    timeTrigger.classList.add('disabled');
+    document.getElementById('f-time').value = '';
+    const d = document.getElementById('timeDisplay');
+    d.textContent = '시간을 선택해주세요';
+    d.classList.add('picker-placeholder');
   } else {
-    revealEls.forEach(function(el){ el.classList.add('in'); });
+    timeTrigger.classList.remove('disabled');
+  }
+});
+
+/* ---------- 이름: 한글만 입력 허용 ---------- */
+const nameInput = document.getElementById('f-name');
+nameInput.addEventListener('input', ()=>{
+  nameInput.value = nameInput.value.replace(/[^가-힣ㄱ-ㅎㅏ-ㅣ\s]/g, '');
+});
+
+/* ---------- 관심 상담 항목 → 재회운 선택 시 상세 필드 노출 ---------- */
+const interestReunion = document.getElementById('int-reunion');
+const reunionFields = document.getElementById('reunionFields');
+const situationInput = document.getElementById('f-situation');
+const situationCount = document.getElementById('situationCount');
+if(situationInput && situationCount){
+  situationInput.addEventListener('input', ()=>{
+    situationCount.textContent = situationInput.value.length + ' / 1,500자';
+  });
+}
+
+interestReunion.addEventListener('change', ()=>{
+  reunionFields.style.display = interestReunion.checked ? 'block' : 'none';
+});
+
+/* ---------- 이메일 알림 설정 ----------
+   Formspree 연동 완료 — 신청서가 접수될 때마다 and31080@naver.com 으로 메일이 전송됩니다.
+   주소를 바꾸고 싶으면 FORMSPREE_ENDPOINT 값을 새로 발급받은 주소로 교체하세요. */
+const FORMSPREE_ENDPOINT = "https://formspree.io/f/mvkokrjv";
+const NOTIFY_EMAIL = "and31080@naver.com";
+
+/* ---------- form submit ---------- */
+const leadForm = document.getElementById('leadForm');
+leadForm.addEventListener('submit', async function(e){
+  e.preventDefault();
+
+  const nameVal = nameInput.value.trim();
+  if(!/^[가-힣]{2,}$/.test(nameVal.replace(/\s/g,''))){
+    alert('이름은 한글로만 입력해주세요 (영어, 숫자 사용 불가)');
+    nameInput.focus();
+    return;
   }
 
-  function applyVideoSrc(videoEl, sourceEl, placeholderEl, url){
-    if(url){
-      sourceEl.src = url;
-      videoEl.load();
-      if(placeholderEl) placeholderEl.style.display = 'none';
-    } else if(placeholderEl){
-      placeholderEl.style.display = '';
+  const interests = Array.from(document.querySelectorAll('input[name=interest]:checked')).map(i=>i.value);
+  if(interests.length === 0){
+    alert('받고 싶은 상담을 하나 이상 선택해주세요');
+    return;
+  }
+
+  if(!document.getElementById('f-birth').value){
+    alert('생년월일을 선택해주세요');
+    return;
+  }
+
+  const submitBtn = leadForm.querySelector('.submit-btn');
+  if(submitBtn){ submitBtn.disabled = true; submitBtn.textContent = '접수 중...'; }
+
+  const lead = {
+    submittedAt: new Date().toLocaleString('ko-KR'),
+    name: nameVal,
+    gender: (document.querySelector('input[name=gender]:checked')||{}).value || '',
+    calendar: (document.querySelector('input[name=calendar]:checked')||{}).value || '',
+    birth: document.getElementById('f-birth').value,
+    time: timeUnknown.checked ? '모름' : (document.getElementById('f-time').value || '미입력'),
+    kakao: document.getElementById('f-kakao').value.trim(),
+    email: document.getElementById('f-email').value.trim(),
+    interests: interests,
+    reunionWish: interestReunion.checked,
+    exGender: interestReunion.checked ? ((document.querySelector('input[name=exGender]:checked')||{}).value || '') : '',
+    exBirth: interestReunion.checked ? document.getElementById('f-ex-birth').value : '',
+    breakup: interestReunion.checked ? document.getElementById('f-breakup').value.trim() : '',
+    situation: interestReunion.checked ? document.getElementById('f-situation').value.trim() : ''
+  };
+
+  try{
+    await window.__leadsDB.addLead(lead);
+  }catch(err){
+    console.error('Firestore 저장 실패:', err);
+    alert('신청서 저장 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요.');
+    if(submitBtn){ submitBtn.disabled = false; submitBtn.textContent = '사주풀이 신청하기'; }
+    return;
+  }
+
+  /* 설정을 마치면 신청서가 접수될 때마다 NOTIFY_EMAIL로 메일이 발송됩니다 */
+  if(FORMSPREE_ENDPOINT.indexOf('YOUR_FORM_ID') === -1){
+    fetch(FORMSPREE_ENDPOINT, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json','Accept':'application/json'},
+      body: JSON.stringify({ ...lead, interests: interests.join(', '), _to: NOTIFY_EMAIL })
+    }).catch(err=>console.error('메일 전송 실패:', err));
+  }
+
+  leadForm.style.display = 'none';
+  document.getElementById('successBox').style.display = 'block';
+});
+
+/* ---------- 카카오톡 링크 ----------
+   관리자 모드에서 링크를 등록하기 전까지는 클릭해도 이동하지 않고
+   안내만 띄웁니다. */
+function guardKakaoLink(el){
+  const href = el.getAttribute('href');
+  if(!href || href === '#'){
+    alert('아직 카카오톡 링크가 등록되지 않았습니다. 관리자 모드 > 홈페이지 문구 관리 > 푸터에서 등록해주세요.');
+    return false;
+  }
+  return true;
+}
+
+/* ---------- admin ---------- */
+function openAdminGate(){
+  document.getElementById('adminOverlay').style.display = 'flex';
+}
+async function checkAdminPw(){
+  const val = document.getElementById('adminPw').value;
+  const hash = await sha256Hex(val);
+  if(hash === ADMIN_PASSWORD_HASH){
+    document.getElementById('adminOverlay').style.display = 'none';
+    document.getElementById('adminPanel').style.display = 'block';
+    switchAdminTab('leads');
+    renderAdminTable();
+    loadSiteSettingsForm();
+  } else {
+    alert('비밀번호가 올바르지 않습니다');
+  }
+}
+function switchAdminTab(tab){
+  const isLeads = tab === 'leads';
+  document.getElementById('tabLeadsBtn').classList.toggle('active', isLeads);
+  document.getElementById('tabSettingsBtn').classList.toggle('active', !isLeads);
+  document.getElementById('adminTabLeads').style.display = isLeads ? 'block' : 'none';
+  document.getElementById('adminTabSettings').style.display = isLeads ? 'none' : 'block';
+  document.getElementById('leadsActions').style.display = isLeads ? 'flex' : 'none';
+  document.getElementById('settingsActions').style.display = isLeads ? 'none' : 'flex';
+  document.getElementById('adminPanelTitle').textContent = isLeads ? '사주풀이 신청 내역' : '홈페이지 문구 관리';
+}
+/* ---------- 홈페이지 문구 전체 관리 ----------
+   페이지에 보이는 문구들을 섹션별로 묶어 관리자 화면에서 한 번에
+   수정할 수 있도록 합니다. 각 항목은 실제 화면 요소의 id를 가리키며,
+   저장하면 Firestore(settings/site)에 저장되고 화면에도 바로 반영됩니다. */
+function escapeHTML(str){
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+const TEXT_FIELDS = [
+  { group:'상단 메뉴', fields:[
+    { key:'navCtaBtn', id:'navCtaBtn', label:'상단 우측 버튼 문구' }
+  ]},
+  { group:'메인 화면 (히어로)', fields:[
+    { key:'heroEyebrow', id:'heroEyebrow', label:'상단 작은 라벨' },
+    { key:'heroTitle', id:'heroTitle', label:'메인 제목 (Enter로 줄바꿈, 마지막 줄은 금색으로 강조됩니다)', hasBr:true, accentLastLine:true, rows:3 },
+    { key:'heroSub', id:'heroSub', label:'제목 아래 설명 문구', rows:2 },
+    { key:'heroBtn', id:'heroBtn', label:'신청 버튼 문구' },
+    { key:'heroNote', id:'heroNote', label:'버튼 아래 작은 안내 문구' },
+    { key:'chartLabel', id:'chartLabel', label:'사주 예시 상단 라벨' },
+    { key:'chartCaption', id:'chartCaption', label:'사주 예시 하단 설명' }
+  ]},
+  { group:'재회운 특화 상담', fields:[
+    { key:'reunionEyebrow', id:'reunionEyebrow', label:'상단 라벨' },
+    { key:'reunionTitle', id:'reunionTitle', label:'제목 (Enter로 줄바꿈)', hasBr:true, rows:2 },
+    { key:'reunionDesc', id:'reunionDesc', label:'설명 문구', rows:3 },
+    { key:'reunionP1Title', id:'reunionP1Title', label:'포인트 01 제목' },
+    { key:'reunionP1Desc', id:'reunionP1Desc', label:'포인트 01 설명', rows:2 },
+    { key:'reunionP2Title', id:'reunionP2Title', label:'포인트 02 제목' },
+    { key:'reunionP2Desc', id:'reunionP2Desc', label:'포인트 02 설명', rows:2 },
+    { key:'reunionP3Title', id:'reunionP3Title', label:'포인트 03 제목' },
+    { key:'reunionP3Desc', id:'reunionP3Desc', label:'포인트 03 설명', rows:2 },
+    { key:'reunionNote', id:'reunionNote', label:'하단 안내 문구', rows:2 }
+  ]},
+  { group:'왜 사주를 봐야 할까요', fields:[
+    { key:'reasonsTitle', id:'reasonsTitle', label:'섹션 제목' },
+    { key:'reasonsDesc', id:'reasonsDesc', label:'섹션 설명' },
+    { key:'reason1Title', id:'reason1Title', label:'카드 1 제목' },
+    { key:'reason1Desc', id:'reason1Desc', label:'카드 1 설명', rows:2 },
+    { key:'reason2Title', id:'reason2Title', label:'카드 2 제목' },
+    { key:'reason2Desc', id:'reason2Desc', label:'카드 2 설명', rows:2 },
+    { key:'reason3Title', id:'reason3Title', label:'카드 3 제목' },
+    { key:'reason3Desc', id:'reason3Desc', label:'카드 3 설명', rows:2 }
+  ]},
+  { group:'신청부터 상담까지', fields:[
+    { key:'processEyebrow', id:'processEyebrow', label:'상단 라벨' },
+    { key:'processTitle', id:'processTitle', label:'섹션 제목' },
+    { key:'step1Title', id:'step1Title', label:'단계 1 제목' },
+    { key:'step1Desc', id:'step1Desc', label:'단계 1 설명', rows:2 },
+    { key:'step2Title', id:'step2Title', label:'단계 2 제목' },
+    { key:'step2Desc', id:'step2Desc', label:'단계 2 설명', rows:2 },
+    { key:'step3Title', id:'step3Title', label:'단계 3 제목' },
+    { key:'step3Desc', id:'step3Desc', label:'단계 3 설명', rows:2 }
+  ]},
+  { group:'신청서 영역', fields:[
+    { key:'formEyebrow', id:'formEyebrow', label:'상단 라벨' },
+    { key:'formTitle', id:'formTitle', label:'섹션 제목' },
+    { key:'formDesc', id:'formDesc', label:'섹션 설명' },
+    { key:'agreeText', id:'agreeText', label:'개인정보 수집·이용 동의 문구', rows:3 },
+    { key:'submitBtn', id:'submitBtn', label:'제출 버튼 문구' },
+    { key:'formFootNote', id:'formFootNote', label:'제출 버튼 아래 안내 문구' }
+  ]},
+  { group:'신청 완료 안내', fields:[
+    { key:'successTitle', id:'successTitle', label:'완료 제목' },
+    { key:'successDesc', id:'successDesc', label:'완료 설명 (Enter로 줄바꿈)', hasBr:true, rows:2 }
+  ]},
+  { group:'푸터', fields:[
+    { key:'footerNotice', id:'footerNotice', label:'상단 안내 문구' },
+    { key:'footBizInfo', id:'footBizInfo', label:'사업자 정보 문구', rows:3 },
+    { key:'kakaoLink', type:'url', targets:['footKakaoLink','kakaoFloatBtn'], label:'카카오톡 링크 (채널/오픈채팅 URL, 우측 하단 버튼과 푸터 링크에 함께 적용됩니다)' }
+  ]}
+];
+
+function getFieldCurrentText(field){
+  if(field.type === 'url'){
+    const el = document.getElementById(field.targets[0]);
+    const href = el ? el.getAttribute('href') : '';
+    return (!href || href === '#') ? '' : href;
+  }
+  const el = document.getElementById(field.id);
+  if(!el) return '';
+  if(field.hasBr) return el.innerText.trim();
+  return (el.tagName === 'INPUT' ? el.value : el.textContent).trim();
+}
+
+function setFieldText(field, value){
+  if(field.type === 'url'){
+    field.targets.forEach(id=>{
+      const el = document.getElementById(id);
+      if(el) el.setAttribute('href', value);
+    });
+    return;
+  }
+  const el = document.getElementById(field.id);
+  if(!el) return;
+  if(field.hasBr){
+    const lines = value.split('\n');
+    if(field.accentLastLine){
+      const last = lines.pop();
+      const head = lines.map(escapeHTML).join('<br>');
+      el.innerHTML = (head ? head + '<br>' : '') + '<span class="accent">' + escapeHTML(last) + '</span>';
+    } else {
+      el.innerHTML = lines.map(escapeHTML).join('<br>');
     }
+  } else if(el.tagName === 'INPUT'){
+    el.value = value;
+  } else {
+    el.textContent = value;
   }
+}
 
-  // ---- 푸터의 카카오톡 상담 아이디 ----
-  document.getElementById('footerKakaoWrap').textContent =
-    CONFIG.kakaoId ? (' · 상담 문의 카카오톡 ' + CONFIG.kakaoId) : '';
-
-  // ---- 캐릭터 소개 영상 (통계-후기 사이) ----
-  applyVideoSrc(document.getElementById('charVideo'), document.getElementById('charVideoSource'), document.getElementById('charVideoPlaceholder'), CONFIG.charVideoUrl);
-
-  // ---- 신청 완료 모달: 결과 영상 / 카카오 링크 / 입금 계좌 준비 ----
-  function prepareResultModal(){
-    applyVideoSrc(document.getElementById('resultVideo'), document.getElementById('resultVideoSource'), document.getElementById('resultVideoPlaceholder'), CONFIG.resultVideoUrl);
-
-    var kakaoBtn = document.getElementById('kakaoLinkBtn');
-    if(CONFIG.kakaoLink){ kakaoBtn.href = CONFIG.kakaoLink; kakaoBtn.style.display = ''; }
-    else{ kakaoBtn.style.display = 'none'; }
-
-    document.getElementById('depositAccountText').textContent = CONFIG.depositAccount || '계좌 정보를 준비 중입니다';
+/* 예전 버전에서는 사업자 정보 문구를 bizInfo 라는 키로 저장했습니다.
+   이미 저장해두신 내용이 있다면 새 구조(footBizInfo)에서도 이어서 보이도록 합니다. */
+function normalizeLegacySettings(settings){
+  settings = settings || {};
+  if((settings.footBizInfo == null || settings.footBizInfo === '') && settings.bizInfo){
+    settings.footBizInfo = settings.bizInfo;
   }
+  return settings;
+}
 
-  // ---- form submit (Firebase Firestore의 "leads" 컬렉션에 저장됩니다) ----
-  var form = document.getElementById('leadForm');
-
-  var contactValueInput = document.getElementById('contactValue');
-  document.querySelectorAll('input[name="contactType"]').forEach(function(radio){
-    radio.addEventListener('change', function(){
-      if(!radio.checked) return;
-      if(radio.value === '이메일'){
-        contactValueInput.type = 'email';
-        contactValueInput.placeholder = 'example@email.com';
-      } else {
-        contactValueInput.type = 'text';
-        contactValueInput.placeholder = '카카오톡 아이디';
+function applySiteSettings(settings){
+  if(!settings) return;
+  settings = normalizeLegacySettings(settings);
+  TEXT_FIELDS.forEach(grp=>{
+    grp.fields.forEach(field=>{
+      if(settings[field.key] != null && settings[field.key] !== ''){
+        setFieldText(field, settings[field.key]);
       }
     });
   });
+}
 
-  form.addEventListener('submit', async function(ev){
-    ev.preventDefault();
-    var fd = new FormData(form);
-    var contactType = fd.get('contactType') || '';
-    var contactValue = (fd.get('contactValue') || '').trim();
-    var lead = {
-      submittedAt: serverTimestamp(),
-      submittedAtText: new Date().toLocaleString('ko-KR'),
-      name: fd.get('name') || '',
-      contact: contactType + ': ' + contactValue,
-      gender: fd.get('gender') || '',
-      calendar: fd.get('calendar') || '',
-      birthdate: fd.get('birthdate') || '',
-      birthtime: fd.get('birthtime') || '',
-      topic: fd.get('topic') || '',
-      memo: fd.get('memo') || ''
-    };
-    var btn = form.querySelector('.btn-submit');
-    var originalLabel = btn.textContent;
-    btn.disabled = true; btn.textContent = '남기는 중...';
-
-    try{
-      await addDoc(collection(db, 'leads'), lead);
-      btn.disabled = false; btn.textContent = originalLabel;
-      form.reset();
-      prepareResultModal();
-      openModal('successModal');
-    }catch(e){
-      console.error('저장 실패', e);
-      btn.disabled = false; btn.textContent = originalLabel;
-      alert('접수 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요.');
-    }
+function renderSettingsForm(currentSettings){
+  currentSettings = normalizeLegacySettings(currentSettings);
+  const wrap = document.getElementById('settingsFieldsWrap');
+  if(!wrap) return;
+  wrap.innerHTML = '';
+  TEXT_FIELDS.forEach((grp, gi)=>{
+    const details = document.createElement('details');
+    details.className = 'settings-group';
+    if(gi === 0) details.open = true;
+    const summary = document.createElement('summary');
+    summary.textContent = grp.group;
+    details.appendChild(summary);
+    const body = document.createElement('div');
+    body.className = 'settings-body';
+    grp.fields.forEach(field=>{
+      const fieldWrap = document.createElement('div');
+      fieldWrap.className = 'settings-field';
+      const label = document.createElement('label');
+      label.setAttribute('for', 'setting-'+field.key);
+      label.textContent = field.label;
+      fieldWrap.appendChild(label);
+      const value = (currentSettings[field.key] != null) ? currentSettings[field.key] : getFieldCurrentText(field);
+      let input;
+      if(field.rows){
+        input = document.createElement('textarea');
+        input.rows = field.rows;
+      } else {
+        input = document.createElement('input');
+        input.type = 'text';
+      }
+      input.id = 'setting-'+field.key;
+      input.value = value;
+      fieldWrap.appendChild(input);
+      body.appendChild(fieldWrap);
+    });
+    details.appendChild(body);
+    wrap.appendChild(details);
   });
+}
 
-  // ---- modal helpers ----
-  function openModal(id){ document.getElementById(id).classList.remove('hidden'); }
-  function closeModal(id){ document.getElementById(id).classList.add('hidden'); }
+async function loadSiteSettingsForm(){
+  const wrap = document.getElementById('settingsFieldsWrap');
+  if(wrap) wrap.innerHTML = '<div class="empty-state">불러오는 중...</div>';
+  try{
+    const settings = await window.__siteSettings.get();
+    renderSettingsForm(settings);
+  }catch(err){
+    console.error('설정 불러오기 실패:', err);
+    renderSettingsForm({});
+  }
+}
 
-  document.getElementById('successClose').addEventListener('click', function(){ closeModal('successModal'); });
-
-  document.getElementById('copyAccount').addEventListener('click', async function(){
-    var text = document.getElementById('depositAccountText').textContent.trim();
-    var btn = this;
-    var original = btn.textContent;
-    try{
-      await navigator.clipboard.writeText(text);
-      btn.textContent = '복사됨';
-    }catch(e){
-      btn.textContent = '복사 실패';
-    }
-    setTimeout(function(){ btn.textContent = original; }, 1500);
+async function saveSiteSettings(){
+  const data = {};
+  TEXT_FIELDS.forEach(grp=>{
+    grp.fields.forEach(field=>{
+      const input = document.getElementById('setting-'+field.key);
+      if(input) data[field.key] = input.value;
+    });
   });
+  try{
+    await window.__siteSettings.save(data);
+    applySiteSettings(data);
+    alert('저장되었습니다');
+  }catch(err){
+    console.error('설정 저장 실패:', err);
+    alert('저장 중 문제가 발생했습니다.');
+  }
+}
+function closeAdmin(){
+  document.getElementById('adminPanel').style.display = 'none';
+  location.hash = '';
+}
+async function getLeads(){
+  return await window.__leadsDB.getLeads();
+}
+async function renderAdminTable(){
+  const wrap = document.getElementById('adminTableWrap');
+  wrap.innerHTML = '<div class="empty-state">불러오는 중...</div>';
+  let leads;
+  try{
+    leads = await getLeads();
+  }catch(err){
+    console.error('Firestore 조회 실패:', err);
+    const reason = (err && err.code) ? err.code : (err && err.message) || '알 수 없는 오류';
+    wrap.innerHTML = `<div class="empty-state">목록을 불러오지 못했습니다.<br>(${reason})<br>Firestore 콘솔에서 leads 컬렉션 읽기 권한을 확인해주세요.</div>`;
+    return;
+  }
+  if(leads.length === 0){
+    wrap.innerHTML = '<div class="empty-state">아직 접수된 신청서가 없습니다</div>';
+    return;
+  }
+  let html = '<table><thead><tr><th>신청일시</th><th>이름</th><th>성별</th><th>양/음력</th><th>생년월일</th><th>시간</th><th>카카오톡</th><th>이메일</th><th>관심 상담</th><th>상대방 성별</th><th>상대방 생년월일</th><th>헤어진 시기</th><th>상황 설명</th><th></th></tr></thead><tbody>';
+  leads.forEach(l=>{
+    html += `<tr>
+      <td>${l.submittedAt}</td>
+      <td>${l.name}</td>
+      <td>${l.gender}</td>
+      <td>${l.calendar}</td>
+      <td>${l.birth}</td>
+      <td>${l.time}</td>
+      <td>${l.kakao || '-'}</td>
+      <td>${l.email || '-'}</td>
+      <td>${(l.interests && l.interests.join(', ')) || '-'}</td>
+      <td>${l.exGender || '-'}</td>
+      <td>${l.exBirth || '-'}</td>
+      <td>${l.breakup || '-'}</td>
+      <td>${l.situation || '-'}</td>
+      <td class="del" onclick="deleteLead('${l.id}')">삭제</td>
+    </tr>`;
+  });
+  html += '</tbody></table>';
+  wrap.innerHTML = html;
+}
+async function deleteLead(id){
+  try{
+    await window.__leadsDB.deleteLead(id);
+  }catch(err){
+    console.error('삭제 실패:', err);
+    alert('삭제 중 문제가 발생했습니다.');
+    return;
+  }
+  renderAdminTable();
+}
+async function clearAll(){
+  if(confirm('모든 신청 내역을 삭제할까요? 이 작업은 되돌릴 수 없습니다.')){
+    try{
+      await window.__leadsDB.clearAll();
+    }catch(err){
+      console.error('전체 삭제 실패:', err);
+      alert('삭제 중 문제가 발생했습니다.');
+      return;
+    }
+    renderAdminTable();
+  }
+}
+async function exportCSV(){
+  let leads;
+  try{
+    leads = await getLeads();
+  }catch(err){
+    console.error('Firestore 조회 실패:', err);
+    alert('목록을 불러오지 못했습니다.');
+    return;
+  }
+  if(leads.length === 0){ alert('다운로드할 데이터가 없습니다'); return; }
+  const headers = ['신청일시','이름','성별','양음력','생년월일','시간','카카오톡','이메일','관심상담','상대방성별','상대방생년월일','헤어진시기','상황설명'];
+  const csvField = v => '"' + String(v==null?'':v).replace(/"/g,'""') + '"';
+  const rows = leads.map(l=>[l.submittedAt,l.name,l.gender,l.calendar,l.birth,l.time,l.kakao,l.email||'',(l.interests||[]).join('/'),l.exGender||'',l.exBirth||'',l.breakup||'',l.situation||''].map(csvField).join(','));
+  const csv = '\uFEFF' + [headers.map(csvField).join(','), ...rows].join('\n');
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = '명운당_신청내역.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+/* route #admin */
+function checkHash(){
+  if(location.hash === '#admin'){
+    if(document.getElementById('adminPanel').style.display === 'block') return;
+    openAdminGate();
+  }
+}
+window.addEventListener('hashchange', checkHash);
+checkHash();
+
+/* ---------- 방문자 화면에 저장된 홈페이지 문구 전체 반영 ---------- */
+window.addEventListener('DOMContentLoaded', async ()=>{
+  try{
+    const settings = await window.__siteSettings.get();
+    applySiteSettings(settings);
+  }catch(err){
+    console.error('사이트 설정 불러오기 실패:', err);
+  }
+});
 </script>
 
 </body>
